@@ -1,0 +1,455 @@
+404 / {"error":"API route not found"}
+404 /11111111-1111-4111-8111-111111111111 {"error":"API route not found"}
+404 /11111111-1111-4111-8111-111111111111/artifacts {"error":"API route not found"}
+404 /11111111-1111-4111-8111-111111111111/export/fidelity {"error":"API route not found"}
+404 /11111111-1111-4111-8111-111111111111/feedback-traces {"error":"API route not found"}
+404 /11111111-1111-4111-8111-111111111111/timeline {"error":"API route not found"}
+404 /_plugins/11111111-1111-4111-8111-111111111111/ui/ {"error":"API route not found"}
+403 /adapters {"error":"Board access required"}
+403 /adapters/11111111-1111-4111-8111-111111111111 {"error":"Board access required"}
+403 /adapters/11111111-1111-4111-8111-111111111111/config-schema {"error":"Board access required"}
+403 /adapters/11111111-1111-4111-8111-111111111111/ui-parser.js {"error":"Board access required"}
+401 /admin/users {"error":"Unauthorized"}
+401 /admin/users/11111111-1111-4111-8111-111111111111/company-access {"error":"Unauthorized"}
+400 /agent-avatars/11111111-1111-4111-8111-111111111111/11111111-1111-4111-8111-111111111111/11111111-1111-4111-8111-111111111111 {"error":"Unsupported avatar version, palette, pose, size, or scale"}
+404 /agents/11111111-1111-4111-8111-111111111111 {"error":"Agent not found"}
+404 /agents/11111111-1111-4111-8111-111111111111/config-revisions {"error":"Agent not found"}
+404 /agents/11111111-1111-4111-8111-111111111111/config-revisions/11111111-1111-4111-8111-111111111111 {"error":"Agent not found"}
+404 /agents/11111111-1111-4111-8111-111111111111/configuration {"error":"Agent not found"}
+404 /agents/11111111-1111-4111-8111-111111111111/identity {"error":"Agent not found"}
+404 /agents/11111111-1111-4111-8111-111111111111/instructions-bundle {"error":"Agent not found"}
+404 /agents/11111111-1111-4111-8111-111111111111/instructions-bundle/candidates {"error":"Agent not found"}
+404 /agents/11111111-1111-4111-8111-111111111111/instructions-bundle/diff {"error":"Agent not found"}
+404 /agents/11111111-1111-4111-8111-111111111111/instructions-bundle/file {"error":"Agent not found"}
+404 /agents/11111111-1111-4111-8111-111111111111/instructions-bundle/history {"error":"Agent not found"}
+404 /agents/11111111-1111-4111-8111-111111111111/instructions-bundle/revision/11111111-1111-4111-8111-111111111111 {"error":"Agent not found"}
+401 /agents/11111111-1111-4111-8111-111111111111/interaction-permissions {"error":"Unauthorized"}
+403 /agents/11111111-1111-4111-8111-111111111111/keys {"error":"Board access required"}
+403 /agents/11111111-1111-4111-8111-111111111111/project-access {"error":"Board access required"}
+403 /agents/11111111-1111-4111-8111-111111111111/runtime-state {"error":"Board access required"}
+404 /agents/11111111-1111-4111-8111-111111111111/skills {"error":"Agent not found"}
+403 /agents/11111111-1111-4111-8111-111111111111/task-sessions {"error":"Board access required"}
+401 /agents/me {"error":"Agent authentication required"}
+401 /agents/me/inbox-lite {"error":"Agent authentication required"}
+401 /agents/me/inbox/mine {"error":"Agent authentication required"}
+401 /agents/me/mcp-skills/11111111-1111-4111-8111-111111111111/files {"error":"Active agent run authentication required"}
+403 /agents/me/secret-proposals {"error":"Run-bound agent authentication required"}
+403 /agents/me/secrets {"error":"Run-bound agent authentication required"}
+401 /announcements/11111111-1111-4111-8111-111111111111/animation {"error":"Unauthorized"}
+401 /announcements/11111111-1111-4111-8111-111111111111/image {"error":"Unauthorized"}
+401 /announcements/current {"error":"Unauthorized"}
+403 /api/chat-github/cloud/callback {"error":"GitHub return did not match this instance"}
+403 /api/chat-github/identity/callback {"error":"GitHub identity return did not match"}
+403 /api/chat-github/manifest/callback {"error":"GitHub return did not match this instance"}
+404 /approvals/11111111-1111-4111-8111-111111111111 {"error":"Approval not found"}
+404 /approvals/11111111-1111-4111-8111-111111111111/comments {"error":"Approval not found"}
+404 /approvals/11111111-1111-4111-8111-111111111111/issues {"error":"Approval not found"}
+404 /assets/11111111-1111-4111-8111-111111111111/content {"error":"Asset not found"}
+404 /attachments/11111111-1111-4111-8111-111111111111/content {"error":"Attachment not found"}
+401 /board-api-keys {"error":"Board authentication required"}
+404 /board-claim/11111111-1111-4111-8111-111111111111 {"error":"Board claim challenge not found"}
+404 /cases/11111111-1111-4111-8111-111111111111/handoffs {"error":"Case not found"}
+403 /cases/11111111-1111-4111-8111-111111111111 {"error":"Cases are disabled","code":"cases_disabled","remediation":"Cases are an experime
+403 /cases/11111111-1111-4111-8111-111111111111/documents/11111111-1111-4111-8111-111111111111 {"error":"Cases are disabled","code":"cases_disabled","remediation":"Cases are an experime
+403 /cases/11111111-1111-4111-8111-111111111111/documents/11111111-1111-4111-8111-111111111111/annotations {"error":"Cases are disabled","code":"cases_disabled","remediation":"Cases are an experime
+403 /cases/11111111-1111-4111-8111-111111111111/documents/11111111-1111-4111-8111-111111111111/annotations/11111111-1111-4111-8111-111111111111 {"error":"Cases are disabled","code":"cases_disabled","remediation":"Cases are an experime
+403 /cases/11111111-1111-4111-8111-111111111111/documents/11111111-1111-4111-8111-111111111111/revisions {"error":"Cases are disabled","code":"cases_disabled","remediation":"Cases are an experime
+403 /cases/11111111-1111-4111-8111-111111111111/events {"error":"Cases are disabled","code":"cases_disabled","remediation":"Cases are an experime
+401 /chat-endpoints/11111111-1111-4111-8111-111111111111 {"error":"Unauthorized"}
+401 /chat-endpoints/11111111-1111-4111-8111-111111111111/activity {"error":"Unauthorized"}
+401 /chat-endpoints/11111111-1111-4111-8111-111111111111/conversations {"error":"Unauthorized"}
+401 /chat-endpoints/11111111-1111-4111-8111-111111111111/github/configuration {"error":"Unauthorized"}
+401 /chat-endpoints/11111111-1111-4111-8111-111111111111/github/personal-connections {"error":"Unauthorized"}
+401 /chat-endpoints/11111111-1111-4111-8111-111111111111/github/repositories {"error":"Unauthorized"}
+401 /chat-endpoints/11111111-1111-4111-8111-111111111111/github/reviews {"error":"Unauthorized"}
+401 /chat-endpoints/11111111-1111-4111-8111-111111111111/github/reviews/11111111-1111-4111-8111-111111111111 {"error":"Unauthorized"}
+401 /chat-endpoints/11111111-1111-4111-8111-111111111111/principals {"error":"Unauthorized"}
+401 /chat-endpoints/11111111-1111-4111-8111-111111111111/resources {"error":"Unauthorized"}
+401 /chat-endpoints/11111111-1111-4111-8111-111111111111/test-status {"error":"Unauthorized"}
+403 /chat-identity-links/preview {"error":"Board access required"}
+403 /chat-slack/managed/oauth/callback {"error":"Board access required"}
+403 /chat-slack/oauth/callback {"error":"Board access required"}
+404 /cli-auth/challenges/11111111-1111-4111-8111-111111111111 {"error":"CLI auth challenge not found"}
+401 /cli-auth/me {"error":"Board authentication required"}
+401 /companies/11111111-1111-4111-8111-111111111111/accounting/events/11111111-1111-4111-8111-111111111111/adjustments {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/accounting/health {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/accounting/inspect {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/accounting/invoices {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/accounting/invoices/11111111-1111-4111-8111-111111111111 {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/activity {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/adapters/11111111-1111-4111-8111-111111111111/detect-model {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/adapters/11111111-1111-4111-8111-111111111111/models {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/agent-commentary {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/agent-commentary/11111111-1111-4111-8111-111111111111 {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/agent-configurations {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/agents {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/ai-connection-pools {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/ai-connection-pools/11111111-1111-4111-8111-111111111111/inspection {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/ai-connections {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/ai-connections/login/11111111-1111-4111-8111-111111111111/setup {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/approvals {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/assigned-work-invariant {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/attention {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/attention/history {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/attention/summary {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/attention/tasks {"error":"Unauthorized"}
+403 /companies/11111111-1111-4111-8111-111111111111/audit/agent-actions {"error":"Board access required"}
+403 /companies/11111111-1111-4111-8111-111111111111/audit/agent-actions.csv {"error":"Board access required"}
+401 /companies/11111111-1111-4111-8111-111111111111/budgets/overview {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/built-in-agents {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/built-in-agents/11111111-1111-4111-8111-111111111111/status {"error":"Unauthorized"}
+403 /companies/11111111-1111-4111-8111-111111111111/cases {"error":"Cases are disabled","code":"cases_disabled","remediation":"Cases are an experime
+403 /companies/11111111-1111-4111-8111-111111111111/cases/types {"error":"Cases are disabled","code":"cases_disabled","remediation":"Cases are an experime
+401 /companies/11111111-1111-4111-8111-111111111111/chat-endpoints {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/chat-slack/setup-options {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/chats {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/claude-oauth-token-status {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/costs/by-agent {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/costs/by-agent-model {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/costs/by-biller {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/costs/by-project {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/costs/by-provider {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/costs/by-user {"error":"Unauthorized"}
+403 /companies/11111111-1111-4111-8111-111111111111/costs/data-quality {"error":"Board access required"}
+401 /companies/11111111-1111-4111-8111-111111111111/costs/finance-by-biller {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/costs/finance-by-kind {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/costs/finance-events {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/costs/finance-summary {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/costs/quota-windows {"error":"Unauthorized"}
+403 /companies/11111111-1111-4111-8111-111111111111/costs/subscriptions {"error":"Board access required"}
+401 /companies/11111111-1111-4111-8111-111111111111/costs/summary {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/costs/window-spend {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/dashboard {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/decision-model {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/decision-model/availability {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/decision-model/history {"error":"Unauthorized"}
+403 /companies/11111111-1111-4111-8111-111111111111/decision-queue-seed-rules {"error":"Board or agent access required"}
+403 /companies/11111111-1111-4111-8111-111111111111/decision-queues {"error":"Board or agent access required"}
+403 /companies/11111111-1111-4111-8111-111111111111/decision-queues/11111111-1111-4111-8111-111111111111/items {"error":"Board or agent access required"}
+403 /companies/11111111-1111-4111-8111-111111111111/decision-training {"error":"Board access required"}
+403 /companies/11111111-1111-4111-8111-111111111111/decision-training/export.jsonl {"error":"Board access required"}
+403 /companies/11111111-1111-4111-8111-111111111111/decision-triage/11111111-1111-4111-8111-111111111111/11111111-1111-4111-8111-111111111111 {"error":"Board or agent access required"}
+403 /companies/11111111-1111-4111-8111-111111111111/decisions {"error":"Board access required"}
+403 /companies/11111111-1111-4111-8111-111111111111/decisions/stats {"error":"Board or agent access required"}
+401 /companies/11111111-1111-4111-8111-111111111111/email/connections {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/email/inboxes {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/email/tasks/11111111-1111-4111-8111-111111111111 {"error":"Unauthorized"}
+403 /companies/11111111-1111-4111-8111-111111111111/environments {"error":"Board access required"}
+403 /companies/11111111-1111-4111-8111-111111111111/environments/capabilities {"error":"Board access required"}
+401 /companies/11111111-1111-4111-8111-111111111111/execution-workspaces {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/fast-response {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/fast-response/availability {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/fast-response/history {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/fast-response/models {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/folders {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/goals {"error":"Unauthorized"}
+403 /companies/11111111-1111-4111-8111-111111111111/grok-invitations {"error":"Board access required"}
+401 /companies/11111111-1111-4111-8111-111111111111/heartbeat-runs {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/inbox-dismissals {"error":"Unauthorized"}
+403 /companies/11111111-1111-4111-8111-111111111111/inbox/mine {"error":"Board access required"}
+401 /companies/11111111-1111-4111-8111-111111111111/invites {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/issue-documents {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/issues {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/issues/chat-bootstrap {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/issues/count {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/issues/summaries {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/join-requests {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/labels {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/link-preview {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/link-previews/cached {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/live-runs {"error":"Unauthorized"}
+403 /companies/11111111-1111-4111-8111-111111111111/managed-agent-profiles {"error":"Board access required"}
+403 /companies/11111111-1111-4111-8111-111111111111/mcp-skills {"error":"Board access required"}
+403 /companies/11111111-1111-4111-8111-111111111111/mcp-skills/11111111-1111-4111-8111-111111111111/content {"error":"Board access required"}
+403 /companies/11111111-1111-4111-8111-111111111111/me/user-secrets {"error":"Board access required"}
+401 /companies/11111111-1111-4111-8111-111111111111/members {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/observability {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/observability/status {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/org {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/org.png {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/org.svg {"error":"Unauthorized"}
+403 /companies/11111111-1111-4111-8111-111111111111/primary-agent/me {"error":"Board access required"}
+401 /companies/11111111-1111-4111-8111-111111111111/project-environments {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/project-repositories {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/projects {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/prompt-injection-prevention {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/prompt-injection-prevention/models {"error":"Unauthorized"}
+403 /companies/11111111-1111-4111-8111-111111111111/provider-traces {"error":"Board access required"}
+401 /companies/11111111-1111-4111-8111-111111111111/recovery-observability {"error":"Unauthorized"}
+403 /companies/11111111-1111-4111-8111-111111111111/remote-agent-profiles {"error":"Board access required"}
+403 /companies/11111111-1111-4111-8111-111111111111/resource-memberships/me {"error":"Board user access required"}
+404 /companies/11111111-1111-4111-8111-111111111111/responsibilities {"error":"Responsibilities are not enabled"}
+404 /companies/11111111-1111-4111-8111-111111111111/responsibilities/automation {"error":"Responsibilities are not enabled"}
+404 /companies/11111111-1111-4111-8111-111111111111/responsibilities/status-reports {"error":"Responsibilities are not enabled"}
+404 /companies/11111111-1111-4111-8111-111111111111/responsibilities/summary {"error":"Responsibilities are not enabled"}
+404 /companies/11111111-1111-4111-8111-111111111111/responsibility-areas {"error":"Responsibilities are not enabled"}
+404 /companies/11111111-1111-4111-8111-111111111111/responsibility-dashboard {"error":"Responsibilities are not enabled"}
+404 /companies/11111111-1111-4111-8111-111111111111/responsibility-dashboard/versions {"error":"Responsibilities are not enabled"}
+404 /companies/11111111-1111-4111-8111-111111111111/responsibility-links/lookup {"error":"Responsibilities are not enabled"}
+401 /companies/11111111-1111-4111-8111-111111111111/routines {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/search {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/search/extract {"error":"Unauthorized"}
+403 /companies/11111111-1111-4111-8111-111111111111/secret-proposals {"error":"Board access required"}
+403 /companies/11111111-1111-4111-8111-111111111111/secret-provider-configs {"error":"Board access required"}
+403 /companies/11111111-1111-4111-8111-111111111111/secret-providers {"error":"Board access required"}
+403 /companies/11111111-1111-4111-8111-111111111111/secret-providers/health {"error":"Board access required"}
+403 /companies/11111111-1111-4111-8111-111111111111/secrets {"error":"Board access required"}
+403 /companies/11111111-1111-4111-8111-111111111111/secrets/catalog {"error":"Board or agent access required"}
+401 /companies/11111111-1111-4111-8111-111111111111/setup-token-login-sessions/11111111-1111-4111-8111-111111111111 {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/setup-token-login-sessions/11111111-1111-4111-8111-111111111111/prompt {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/setup-token-login-sessions/active {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/sidebar-badges {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/sidebar-preferences/me {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/skill-policy {"error":"Authentication required","code":"skill_authentication_required","details":{"code
+401 /companies/11111111-1111-4111-8111-111111111111/skill-sources {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/skill-sources/11111111-1111-4111-8111-111111111111 {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/skill-sources/11111111-1111-4111-8111-111111111111/branches {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/skill-sources/project-repositories {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/skill-sources/repositories {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/skill-test-run-templates {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/skills {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/skills/11111111-1111-4111-8111-111111111111 {"error":"Authentication required"}
+401 /companies/11111111-1111-4111-8111-111111111111/skills/11111111-1111-4111-8111-111111111111/comments {"error":"Authentication required"}
+401 /companies/11111111-1111-4111-8111-111111111111/skills/11111111-1111-4111-8111-111111111111/files {"error":"Authentication required"}
+401 /companies/11111111-1111-4111-8111-111111111111/skills/11111111-1111-4111-8111-111111111111/fork-precheck {"error":"Authentication required"}
+401 /companies/11111111-1111-4111-8111-111111111111/skills/11111111-1111-4111-8111-111111111111/test-inputs {"error":"Authentication required"}
+401 /companies/11111111-1111-4111-8111-111111111111/skills/11111111-1111-4111-8111-111111111111/test-runs {"error":"Authentication required"}
+401 /companies/11111111-1111-4111-8111-111111111111/skills/11111111-1111-4111-8111-111111111111/test-runs/11111111-1111-4111-8111-111111111111 {"error":"Authentication required"}
+401 /companies/11111111-1111-4111-8111-111111111111/skills/11111111-1111-4111-8111-111111111111/update-diff {"error":"Authentication required"}
+401 /companies/11111111-1111-4111-8111-111111111111/skills/11111111-1111-4111-8111-111111111111/update-status {"error":"Authentication required"}
+401 /companies/11111111-1111-4111-8111-111111111111/skills/11111111-1111-4111-8111-111111111111/versions {"error":"Authentication required"}
+401 /companies/11111111-1111-4111-8111-111111111111/skills/11111111-1111-4111-8111-111111111111/versions/11111111-1111-4111-8111-111111111111 {"error":"Authentication required"}
+401 /companies/11111111-1111-4111-8111-111111111111/skills/categories {"error":"Unauthorized"}
+403 /companies/11111111-1111-4111-8111-111111111111/slack/endpoints/11111111-1111-4111-8111-111111111111/search {"error":"Chat connectors are disabled"}
+404 /companies/11111111-1111-4111-8111-111111111111/smoke-lab/oauth/authorize {"error":"Smoke lab is disabled"}
+404 /companies/11111111-1111-4111-8111-111111111111/smoke-lab/oauth/userinfo {"error":"Smoke lab is disabled"}
+403 /companies/11111111-1111-4111-8111-111111111111/smoke-lab/runs {"error":"Board or agent access required"}
+403 /companies/11111111-1111-4111-8111-111111111111/smoke-lab/runs/11111111-1111-4111-8111-111111111111 {"error":"Board or agent access required"}
+403 /companies/11111111-1111-4111-8111-111111111111/smoke-lab/services {"error":"Board access required"}
+401 /companies/11111111-1111-4111-8111-111111111111/status-cards {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/summary-slots/11111111-1111-4111-8111-111111111111/11111111-1111-4111-8111-111111111111 {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/summary-slots/11111111-1111-4111-8111-111111111111/11111111-1111-4111-8111-111111111111/revisions {"error":"Unauthorized"}
+403 /companies/11111111-1111-4111-8111-111111111111/tailscale-connections {"error":"Board access required"}
+403 /companies/11111111-1111-4111-8111-111111111111/tailscale-connections/11111111-1111-4111-8111-111111111111/devices {"error":"Board access required"}
+401 /companies/11111111-1111-4111-8111-111111111111/teams/catalog/installed {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/tool-icons {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/tools/action-requests {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/tools/applications {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/tools/apps/11111111-1111-4111-8111-111111111111/preflight {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/tools/apps/attention {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/tools/connections {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/tools/examples {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/tools/gallery {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/tools/gateways {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/tools/policies {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/tools/profiles {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/tools/profiles/effective/agents/11111111-1111-4111-8111-111111111111 {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/tools/runs/11111111-1111-4111-8111-111111111111/decisions {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/tools/runtime-health {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/tools/runtime-slots {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/tools/stdio-templates {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/tools/trust-rules {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/user-directory {"error":"Unauthorized"}
+403 /companies/11111111-1111-4111-8111-111111111111/user-secret-definitions {"error":"Board access required"}
+403 /companies/11111111-1111-4111-8111-111111111111/user-secret-definitions/11111111-1111-4111-8111-111111111111/coverage {"error":"Board access required"}
+401 /companies/11111111-1111-4111-8111-111111111111/users/11111111-1111-4111-8111-111111111111/inbox-agent-policy {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/users/11111111-1111-4111-8111-111111111111/profile {"error":"Unauthorized"}
+401 /companies/11111111-1111-4111-8111-111111111111/users/me/inbox-agent-policy {"error":"Unauthorized"}
+403 /companies/11111111-1111-4111-8111-111111111111/voice-callbacks/11111111-1111-4111-8111-111111111111 {"error":"Enable experimental chat connectors to use voice"}
+403 /companies/11111111-1111-4111-8111-111111111111/voice-history/11111111-1111-4111-8111-111111111111 {"error":"Board access required"}
+403 /companies/11111111-1111-4111-8111-111111111111/voice-phone/11111111-1111-4111-8111-111111111111 {"error":"Board access required"}
+403 /companies/11111111-1111-4111-8111-111111111111/voice-phone/11111111-1111-4111-8111-111111111111/history {"error":"Board access required"}
+403 /companies/11111111-1111-4111-8111-111111111111/voice-phone/11111111-1111-4111-8111-111111111111/incoming {"error":"Board access required"}
+403 /companies/11111111-1111-4111-8111-111111111111/voice-sessions/11111111-1111-4111-8111-111111111111 {"error":"Board access required"}
+403 /companies/11111111-1111-4111-8111-111111111111/voice-sessions/11111111-1111-4111-8111-111111111111/notification {"error":"Board access required"}
+403 /companies/11111111-1111-4111-8111-111111111111/voice-sessions/11111111-1111-4111-8111-111111111111/report {"error":"Board access required"}
+403 /companies/11111111-1111-4111-8111-111111111111/workflows {"error":"Cases are disabled","code":"cases_disabled","remediation":"Cases are an experime
+403 /companies/11111111-1111-4111-8111-111111111111/workload-identity {"error":"Board access required"}
+401 /companies/11111111-1111-4111-8111-111111111111/workspace-overview {"error":"Unauthorized"}
+403 /connection-intents/11111111-1111-4111-8111-111111111111/setup-options {"error":"Board access required"}
+403 /decision-training/11111111-1111-4111-8111-111111111111 {"error":"Board access required"}
+403 /decisions/11111111-1111-4111-8111-111111111111 {"error":"Board or agent access required"}
+403 /environment-custom-image-setup-sessions/11111111-1111-4111-8111-111111111111 {"error":"Instance environment management is restricted to board operators"}
+403 /environment-leases/11111111-1111-4111-8111-111111111111 {"error":"Board access required"}
+403 /environments/11111111-1111-4111-8111-111111111111/custom-image-template {"error":"Instance environment management is restricted to board operators"}
+403 /environments/11111111-1111-4111-8111-111111111111 {"error":"Board access required"}
+403 /environments/11111111-1111-4111-8111-111111111111/delete-blast-radius {"error":"Instance environment management is restricted to board operators"}
+403 /environments/11111111-1111-4111-8111-111111111111/leases {"error":"Board access required"}
+403 /environments/11111111-1111-4111-8111-111111111111/secret-refs {"error":"Instance environment management is restricted to board operators"}
+404 /execution-workspaces/11111111-1111-4111-8111-111111111111 {"error":"Execution workspace not found"}
+404 /execution-workspaces/11111111-1111-4111-8111-111111111111/close-readiness {"error":"Execution workspace not found"}
+404 /execution-workspaces/11111111-1111-4111-8111-111111111111/workspace-operations {"error":"Execution workspace not found"}
+403 /feedback-traces/11111111-1111-4111-8111-111111111111 {"error":"Only board users can view feedback traces"}
+403 /feedback-traces/11111111-1111-4111-8111-111111111111/bundle {"error":"Only board users can view feedback trace bundles"}
+404 /get-session {"error":"API route not found"}
+404 /goals/11111111-1111-4111-8111-111111111111 {"error":"Goal not found"}
+404 /heartbeat-runs/11111111-1111-4111-8111-111111111111 {"error":"Heartbeat run not found"}
+404 /heartbeat-runs/11111111-1111-4111-8111-111111111111/events {"error":"Heartbeat run not found"}
+401 /heartbeat-runs/11111111-1111-4111-8111-111111111111/issues {"error":"Unauthorized"}
+404 /heartbeat-runs/11111111-1111-4111-8111-111111111111/log {"error":"Heartbeat run not found"}
+403 /heartbeat-runs/11111111-1111-4111-8111-111111111111/provider-trace {"error":"Board access required"}
+404 /heartbeat-runs/11111111-1111-4111-8111-111111111111/workspace-operations {"error":"Heartbeat run not found"}
+404 /import/jobs/11111111-1111-4111-8111-111111111111 {"error":"API route not found"}
+403 /instance/ephemeral-enrollment/eligibility {"error":"cloud_control_required"}
+403 /instance/lifecycle {"error":"Board access required"}
+403 /instance/scheduler-heartbeats {"error":"Board access required"}
+404 /instance/server-metrics {"error":"API route not found"}
+403 /instance/settings {"error":"Board access required"}
+403 /instance/settings/experimental {"error":"Board access required"}
+403 /instance/settings/general {"error":"Board access required"}
+403 /instance/task-drain {"error":"Board access required"}
+404 /invites/11111111-1111-4111-8111-111111111111 {"error":"Invite not found"}
+404 /invites/11111111-1111-4111-8111-111111111111/logo {"error":"Invite not found"}
+404 /invites/11111111-1111-4111-8111-111111111111/onboarding {"error":"Invite not found"}
+404 /invites/11111111-1111-4111-8111-111111111111/onboarding.txt {"error":"Invite not found"}
+404 /invites/11111111-1111-4111-8111-111111111111/skills/11111111-1111-4111-8111-111111111111 {"error":"Invite not found"}
+404 /invites/11111111-1111-4111-8111-111111111111/skills/index {"error":"Invite not found"}
+404 /invites/11111111-1111-4111-8111-111111111111/test-resolution {"error":"Invite not found"}
+400 /issues {"error":"Missing companyId in path. Use /api/companies/{companyId}/issues."}
+404 /issues/11111111-1111-4111-8111-111111111111 {"error":"Issue not found"}
+404 /issues/11111111-1111-4111-8111-111111111111/accepted-plan-decompositions {"error":"Issue not found"}
+404 /issues/11111111-1111-4111-8111-111111111111/access-grants {"error":"Issue not found"}
+404 /issues/11111111-1111-4111-8111-111111111111/activity {"error":"Issue not found"}
+404 /issues/11111111-1111-4111-8111-111111111111/approvals {"error":"Issue not found"}
+404 /issues/11111111-1111-4111-8111-111111111111/attachments {"error":"Issue not found"}
+404 /issues/11111111-1111-4111-8111-111111111111/automation-conversation {"error":"Responsibilities are not enabled"}
+403 /issues/11111111-1111-4111-8111-111111111111/chat-handoffs {"error":"Board access required"}
+404 /issues/11111111-1111-4111-8111-111111111111/comments {"error":"Issue not found"}
+404 /issues/11111111-1111-4111-8111-111111111111/comments/11111111-1111-4111-8111-111111111111 {"error":"Issue not found"}
+404 /issues/11111111-1111-4111-8111-111111111111/context-usage {"error":"Issue not found"}
+404 /issues/11111111-1111-4111-8111-111111111111/cost-summary {"error":"Issue not found"}
+403 /issues/11111111-1111-4111-8111-111111111111/decision-receipts {"error":"Board access required"}
+404 /issues/11111111-1111-4111-8111-111111111111/diagnostics/blockers {"error":"Issue not found"}
+404 /issues/11111111-1111-4111-8111-111111111111/diagnostics/subtree {"error":"Issue not found"}
+404 /issues/11111111-1111-4111-8111-111111111111/diagnostics/wakes {"error":"Issue not found"}
+404 /issues/11111111-1111-4111-8111-111111111111/documents {"error":"Issue not found"}
+404 /issues/11111111-1111-4111-8111-111111111111/documents/11111111-1111-4111-8111-111111111111 {"error":"Issue not found"}
+404 /issues/11111111-1111-4111-8111-111111111111/documents/11111111-1111-4111-8111-111111111111/annotations {"error":"Issue not found"}
+404 /issues/11111111-1111-4111-8111-111111111111/documents/11111111-1111-4111-8111-111111111111/revisions {"error":"Issue not found"}
+404 /issues/11111111-1111-4111-8111-111111111111/documents/11111111-1111-4111-8111-111111111111/revisions/11111111-1111-4111-8111-111111111111 {"error":"Issue not found"}
+404 /issues/11111111-1111-4111-8111-111111111111/external-object-summary {"error":"Issue not found"}
+404 /issues/11111111-1111-4111-8111-111111111111/external-objects {"error":"Issue not found"}
+404 /issues/11111111-1111-4111-8111-111111111111/feedback-traces {"error":"Issue not found"}
+404 /issues/11111111-1111-4111-8111-111111111111/feedback-votes {"error":"Issue not found"}
+404 /issues/11111111-1111-4111-8111-111111111111/heartbeat-context {"error":"Issue not found"}
+404 /issues/11111111-1111-4111-8111-111111111111/interactions {"error":"Issue not found"}
+403 /issues/11111111-1111-4111-8111-111111111111/pending-questions {"error":"Board access required"}
+404 /issues/11111111-1111-4111-8111-111111111111/privacy-constraints {"error":"Issue not found"}
+404 /issues/11111111-1111-4111-8111-111111111111/queued-comments {"error":"Issue not found"}
+404 /issues/11111111-1111-4111-8111-111111111111/recent-comments {"error":"Issue not found"}
+404 /issues/11111111-1111-4111-8111-111111111111/recovery-actions {"error":"Issue not found"}
+404 /issues/11111111-1111-4111-8111-111111111111/runner-goal {"error":"Issue not found"}
+404 /issues/11111111-1111-4111-8111-111111111111/runs {"error":"Issue not found"}
+403 /issues/11111111-1111-4111-8111-111111111111/tree-control/state {"error":"Board access required"}
+403 /issues/11111111-1111-4111-8111-111111111111/tree-holds {"error":"Board access required"}
+403 /issues/11111111-1111-4111-8111-111111111111/tree-holds/11111111-1111-4111-8111-111111111111 {"error":"Board access required"}
+404 /issues/11111111-1111-4111-8111-111111111111/watchdog {"error":"Issue not found"}
+404 /issues/11111111-1111-4111-8111-111111111111/work-products {"error":"Issue not found"}
+404 /issues/11111111-1111-4111-8111-111111111111/workspace {"error":"Task not found"}
+404 /issues/11111111-1111-4111-8111-111111111111/active-run {"error":"Issue not found"}
+403 /issues/11111111-1111-4111-8111-111111111111/browsers {"error":"Board access required"}
+403 /issues/11111111-1111-4111-8111-111111111111/cases {"error":"Cases are disabled","code":"cases_disabled","remediation":"Cases are an experime
+401 /issues/11111111-1111-4111-8111-111111111111/chat-binding {"error":"Unauthorized"}
+404 /issues/11111111-1111-4111-8111-111111111111/execution {"error":"Issue not found"}
+403 /issues/11111111-1111-4111-8111-111111111111/file-resources/content {"error":"Board access required"}
+403 /issues/11111111-1111-4111-8111-111111111111/file-resources/list {"error":"Board access required"}
+403 /issues/11111111-1111-4111-8111-111111111111/file-resources/resolve {"error":"Board access required"}
+404 /issues/11111111-1111-4111-8111-111111111111/live-runs {"error":"Issue not found"}
+403 /issues/11111111-1111-4111-8111-111111111111/mcp-app-views {"error":"Board access required"}
+403 /issues/11111111-1111-4111-8111-111111111111/mcp-app-views/11111111-1111-4111-8111-111111111111 {"error":"Board access required"}
+403 /issues/11111111-1111-4111-8111-111111111111/tool-call-progress {"error":"Board access required"}
+404 /issues/11111111-1111-4111-8111-111111111111/chat-bootstrap {"error":"Issue not found"}
+403 /llms/agent-configuration.txt {"error":"Board or permitted agent authentication required"}
+403 /llms/agent-configuration/11111111-1111-4111-8111-111111111111.txt {"error":"Board or permitted agent authentication required"}
+403 /llms/agent-icons.txt {"error":"Board or permitted agent authentication required"}
+401 /mcp/connections {"error":"access_denied","error_description":"Sign in to manage assistant connections."}
+400 /mcp/device {"error":"invalid_request","error_description":"Enter the code shown by your assistant."}
+404 /mcp/gateways/11111111-1111-4111-8111-111111111111 {"error":"API route not found"}
+404 /mcp/runtime-tools {"error":"API route not found"}
+401 /mcp/setup {"error":"access_denied","error_description":"Sign in to manage assistant connections."}
+404 /oidc/companies/11111111-1111-4111-8111-111111111111/.well-known/openid-configuration {"error":"API route not found"}
+404 /oidc/companies/11111111-1111-4111-8111-111111111111/jwks.json {"error":"API route not found"}
+200 /openapi.json {"openapi":"3.0.0","info":{"title":"Paperclip API","version":"1.0.0","description":"REST A
+403 /plugins {"error":"Board access required"}
+403 /plugins/11111111-1111-4111-8111-111111111111 {"error":"Board access required"}
+403 /plugins/11111111-1111-4111-8111-111111111111/bridge/stream/11111111-1111-4111-8111-111111111111 {"error":"Board access required"}
+403 /plugins/11111111-1111-4111-8111-111111111111/companies/11111111-1111-4111-8111-111111111111/local-folders {"error":"Board access required"}
+403 /plugins/11111111-1111-4111-8111-111111111111/companies/11111111-1111-4111-8111-111111111111/local-folders/11111111-1111-4111-8111-111111111111/status {"error":"Board access required"}
+403 /plugins/11111111-1111-4111-8111-111111111111/config {"error":"Board access required"}
+403 /plugins/11111111-1111-4111-8111-111111111111/dashboard {"error":"Board access required"}
+403 /plugins/11111111-1111-4111-8111-111111111111/health {"error":"Board access required"}
+403 /plugins/11111111-1111-4111-8111-111111111111/jobs {"error":"Board access required"}
+403 /plugins/11111111-1111-4111-8111-111111111111/jobs/11111111-1111-4111-8111-111111111111/runs {"error":"Board access required"}
+403 /plugins/11111111-1111-4111-8111-111111111111/logs {"error":"Board access required"}
+403 /plugins/examples {"error":"Board access required"}
+403 /plugins/tools {"error":"Board or agent access required"}
+403 /plugins/ui-contributions {"error":"Board access required"}
+404 /profile {"error":"API route not found"}
+404 /projects/11111111-1111-4111-8111-111111111111 {"error":"Project not found"}
+404 /projects/11111111-1111-4111-8111-111111111111/access-members {"error":"Project not found"}
+404 /projects/11111111-1111-4111-8111-111111111111/external-object-summary {"error":"Project not found"}
+403 /projects/11111111-1111-4111-8111-111111111111/git-authorization {"error":"Board access required"}
+404 /projects/11111111-1111-4111-8111-111111111111/workspaces {"error":"Project not found"}
+404 /responsibilities/11111111-1111-4111-8111-111111111111 {"error":"Responsibilities are not enabled"}
+404 /responsibilities/11111111-1111-4111-8111-111111111111/bar-conversation {"error":"Responsibilities are not enabled"}
+404 /responsibilities/11111111-1111-4111-8111-111111111111/metrics {"error":"Responsibilities are not enabled"}
+404 /responsibilities/11111111-1111-4111-8111-111111111111/runs {"error":"Responsibilities are not enabled"}
+404 /responsibilities/11111111-1111-4111-8111-111111111111/status-report {"error":"Responsibilities are not enabled"}
+404 /responsibilities/11111111-1111-4111-8111-111111111111/summary {"error":"Responsibilities are not enabled"}
+404 /routines/11111111-1111-4111-8111-111111111111 {"error":"Routine not found"}
+404 /routines/11111111-1111-4111-8111-111111111111/description/annotations {"error":"Routine not found"}
+404 /routines/11111111-1111-4111-8111-111111111111/description/annotations/11111111-1111-4111-8111-111111111111 {"error":"Routine not found"}
+404 /routines/11111111-1111-4111-8111-111111111111/revisions {"error":"Routine not found"}
+404 /routines/11111111-1111-4111-8111-111111111111/runs {"error":"Routine not found"}
+404 /run-authority {"error":"API route not found"}
+403 /secret-provider-configs/11111111-1111-4111-8111-111111111111 {"error":"Board access required"}
+403 /secrets/11111111-1111-4111-8111-111111111111/access-events {"error":"Board access required"}
+403 /secrets/11111111-1111-4111-8111-111111111111/usage {"error":"Board access required"}
+403 /sidebar-preferences/me {"error":"Board access required"}
+401 /skills/11111111-1111-4111-8111-111111111111 {"error":"Unauthorized"}
+401 /skills/available {"error":"Unauthorized"}
+401 /skills/catalog {"error":"Unauthorized"}
+401 /skills/catalog/11111111-1111-4111-8111-111111111111 {"error":"Unauthorized"}
+401 /skills/catalog/11111111-1111-4111-8111-111111111111/files {"error":"Unauthorized"}
+401 /skills/index {"error":"Unauthorized"}
+403 /slack/search/callback {"error":"Chat connectors are disabled"}
+404 /stacks {"error":"API route not found"}
+404 /stats {"error":"API route not found"}
+404 /status-cards/11111111-1111-4111-8111-111111111111 {"error":"Status cards are not enabled"}
+404 /status-cards/11111111-1111-4111-8111-111111111111/dry-run {"error":"Status cards are not enabled"}
+404 /status-cards/11111111-1111-4111-8111-111111111111/summary-revisions {"error":"Status cards are not enabled"}
+404 /status-cards/11111111-1111-4111-8111-111111111111/updates {"error":"Status cards are not enabled"}
+401 /teams/catalog {"error":"Unauthorized"}
+401 /teams/catalog/11111111-1111-4111-8111-111111111111 {"error":"Unauthorized"}
+401 /teams/catalog/11111111-1111-4111-8111-111111111111/files {"error":"Unauthorized"}
+401 /tool-connections/11111111-1111-4111-8111-111111111111 {"error":"Unauthorized"}
+401 /tool-connections/11111111-1111-4111-8111-111111111111/activity {"error":"Unauthorized"}
+401 /tool-connections/11111111-1111-4111-8111-111111111111/aggregator/apps {"error":"Unauthorized"}
+401 /tool-connections/11111111-1111-4111-8111-111111111111/catalog {"error":"Unauthorized"}
+401 /tool-connections/11111111-1111-4111-8111-111111111111/composio/apps {"error":"Unauthorized"}
+401 /tool-connections/11111111-1111-4111-8111-111111111111/grants {"error":"Unauthorized"}
+401 /tool-connections/11111111-1111-4111-8111-111111111111/installs {"error":"Unauthorized"}
+401 /tool-connections/11111111-1111-4111-8111-111111111111/machine-sign-in {"error":"Unauthorized"}
+401 /tool-connections/11111111-1111-4111-8111-111111111111/profile-configuration {"error":"Unauthorized"}
+401 /tool-connections/11111111-1111-4111-8111-111111111111/review-counts {"error":"Unauthorized"}
+401 /tool-connections/11111111-1111-4111-8111-111111111111/stored-content {"error":"Unauthorized"}
+401 /tool-connections/11111111-1111-4111-8111-111111111111/stored-content/deletion {"error":"Unauthorized"}
+401 /tool-connections/11111111-1111-4111-8111-111111111111/test-agents {"error":"Unauthorized"}
+401 /tool-connections/11111111-1111-4111-8111-111111111111/test-agents/11111111-1111-4111-8111-111111111111/access {"error":"Unauthorized"}
+401 /tool-connections/11111111-1111-4111-8111-111111111111/test-calls/11111111-1111-4111-8111-111111111111 {"error":"Unauthorized"}
+401 /tool-connections/11111111-1111-4111-8111-111111111111/usage {"error":"Unauthorized"}
+401 /tool-gateway/audit {"error":"Unauthorized"}
+405 /tool-gateway/gateways/11111111-1111-4111-8111-111111111111/mcp 
+401 /tool-gateway/runtime-slots {"error":"Unauthorized"}
+401 /tool-gateway/tools {"error":"Tool gateway session token is required"}
+401 /tool-profiles/11111111-1111-4111-8111-111111111111/new-tools {"error":"Unauthorized"}
+403 /tools/oauth/callback {"error":"Board access required"}
+403 /tools/oauth/cloud-connector/callback {"error":"Board access required"}
+403 /tools/oauth/cloud-connector/enrollment {"error":"Board access required"}
+403 /tools/oauth/cloud-connector/enrollment-callback {"error":"Board access required"}
+403 /tools/oauth/paperclip-id/callback {"error":"Board access required"}
+403 /tools/oauth/tailscale/callback {"error":"Board access required"}
+403 /tools/vercel-connect/callback {"error":"Board access required"}
+403 /workflows/11111111-1111-4111-8111-111111111111 {"error":"Cases are disabled","code":"cases_disabled","remediation":"Cases are an experime
+404 /workspace-operations/11111111-1111-4111-8111-111111111111/log {"error":"Workspace operation not found"}
+403 /workspace-preferences/me {"error":"Board access required"}
