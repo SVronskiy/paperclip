@@ -1,3 +1,4 @@
+import { redirectToValidatedLocation } from "./safe-redirect.js";
 import express, { Router, type Request } from "express";
 import { z } from "zod";
 import type { Db } from "@paperclipai/db";
@@ -54,7 +55,7 @@ export function museTransportRoutes(db:Db,publicOrigin?:string,options:{allowLeg
         const oauth=museOAuth(db,publicOrigin),source=req.ip??req.socket.remoteAddress??"unknown";
         try {
           if(route.path.endsWith("/register")){res.status(201).json(await oauth.register(req.body,source));return;}
-          if(route.path.endsWith("/authorize")){res.redirect(303,await oauth.authorize(req.query,source));return;}
+          if(route.path.endsWith("/authorize")){redirectToValidatedLocation(res,303,await oauth.authorize(req.query,source));return;}
           if(route.path.endsWith("/token")){res.json(await oauth.token(req.body??{}));return;}
           if(route.path.endsWith("/revoke")){
             const value=z.object({token:z.string().min(1).max(200),client_id:z.string().min(1).max(2048),resource:z.literal(oauth.config.resource).optional()}).strip().safeParse(req.body);

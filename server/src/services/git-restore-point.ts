@@ -594,7 +594,7 @@ export async function openRestorePoint(input: {
   const iv = input.ciphertext.subarray(SEALED_MAGIC.length, SEALED_MAGIC.length + 12);
   const tag = input.ciphertext.subarray(input.ciphertext.length - 16);
   const body = input.ciphertext.subarray(SEALED_MAGIC.length + 12, input.ciphertext.length - 16);
-  const decipher = createDecipheriv("aes-256-gcm", Buffer.from(unwrapped.dataKey, "base64"), iv);
+  const decipher = createDecipheriv("aes-256-gcm", Buffer.from(unwrapped.dataKey, "base64"), iv, { authTagLength: 16 });
   decipher.setAAD(additionalData(identity));
   decipher.setAuthTag(tag);
   let payload: Buffer;

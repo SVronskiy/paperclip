@@ -143,7 +143,7 @@ function fileCryptoWorker(require: NodeJS.Require): void {
           await writeAll(target, store(cipher.getAuthTag()));
           return { plaintextSha256: plaintext.digest("hex"), plaintextBytes, sha256: stored.digest("hex"), byteSize };
         }
-        const decipher = crypto.createDecipheriv("aes-256-gcm", key, bytes(job.iv));
+        const decipher = crypto.createDecipheriv("aes-256-gcm", key, bytes(job.iv), { authTagLength: 16 });
         decipher.setAAD(bytes(job.aad)); decipher.setAuthTag(bytes(job.authTag));
         await pump(input, job.start, job.end, cancel, target, part => decipher.update(part));
         let last: Buffer | undefined, authenticationFailure: { message: string; code?: string } | undefined;

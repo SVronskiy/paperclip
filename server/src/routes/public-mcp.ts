@@ -1,3 +1,4 @@
+import { redirectToValidatedLocation } from "./safe-redirect.js";
 import {cloudEventAuthoritySchema} from "../services/public-mcp/cloud-event-authority.js";
 import { verifyMcpDeviceMintContext } from "../services/public-mcp/device-mint-authority.js";
 import { mcpDiscoveryDocuments } from "../services/public-mcp/discovery.js";
@@ -75,7 +76,7 @@ export function publicMcpIngressRoutes(oauth: PublicMcpOAuth, execute: ReturnTyp
   router.use(oauthPath, authRateLimit(), express.urlencoded({ extended: false, limit: "16kb" }));
   router.post(oauthPath + "/register", async (req, res) => res.status(201).json(await oauth.register(req.body, req.ip ?? req.socket.remoteAddress ?? "unknown")));
   router.post(oauthPath + "/device_authorization", async (req, res) => res.json(await oauth.deviceAuthorize(req.body, req.ip ?? req.socket.remoteAddress ?? "unknown",verifyMcpDeviceMintContext(req,oauth.config.resource))));
-  router.get(oauthPath + "/authorize", async (req, res) => res.redirect(303, await oauth.authorize(req.query, req.ip ?? req.socket.remoteAddress ?? "unknown")));
+  router.get(oauthPath + "/authorize", async (req, res) => redirectToValidatedLocation(res, 303, await oauth.authorize(req.query, req.ip ?? req.socket.remoteAddress ?? "unknown")));
   router.post(oauthPath + "/token", async (req, res) => res.json(await oauth.token(req.body ?? {})));
   router.post(oauthPath + "/revoke", async (req, res) => {
     if (typeof req.body?.token !== "string" || typeof req.body?.client_id !== "string") throw new McpOAuthError("invalid_request", "A token and client_id are required.");

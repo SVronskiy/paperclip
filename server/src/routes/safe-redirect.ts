@@ -45,3 +45,37 @@ export function safeRedirect(
   logger.warn({ rejectedRedirect: true }, "blocked a redirect to a target outside the allowed origins");
   res.redirect(status, fallback);
 }
+
+/** Absolute URL a service may hand back: https, or http only on a loopback host, no credentials. */
+export function isSafeAbsoluteRedirect(target: unknown): target is string {
+  if (typeof target !== "string" || target.length === 0 || target.length > 4096) return false;
+  try {
+    const url = new URL(target);
+    if (url.username || url.password) return false;
+    return url.protocol === "https:"
+      || (url.protocol === "http:" && ["localhost", "127.0.0.1", "[::1]"].includes(url.hostname));
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * For redirects whose target a service already validated against a registered
+ * client or a fixed integration (OAuth `redirect_uri`, GitHub app callbacks):
+ * this is the last gate in front of `res.redirect`. It accepts only an internal
+ * path or an absolute https (or loopback http) URL without credentials, and
+ * replaces anything else (`javascript:`, `//host`, `data:`) with `fallback`.
+ */
+export function redirectToValidatedLocation(
+  res: Pick<Response, "redirect">,
+  status: 301 | 302 | 303 | 307 | 308,
+  target: unknown,
+  fallback = "/",
+): void {
+  if (isSafeInternalPath(target) || isSafeAbsoluteRedirect(target)) {
+    res.redirect(status, target);
+    return;
+  }
+  logger.warn({ rejectedRedirect: true }, "blocked a redirect to an unsupported target");
+  res.redirect(status, fallback);
+}

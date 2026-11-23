@@ -1,3 +1,4 @@
+import { redirectToValidatedLocation } from "./safe-redirect.js";
 import { Router, urlencoded, type Request } from "express";
 import type { Db } from "@paperclipai/db";
 import type { DeploymentExposure, DeploymentMode } from "@paperclipai/shared";
@@ -81,7 +82,7 @@ export function smokeLabRoutes(db: Db, options: {
       password: stringBodyValue(req.body, "password"),
       requestOrigin: configuredPublicBaseUrl() ?? undefined,
     });
-    res.redirect(302, location);
+    redirectToValidatedLocation(res, 302, location);
   });
 
   router.post("/companies/:companyId/smoke-lab/oauth/token", formParser, async (req, res) => {

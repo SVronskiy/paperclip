@@ -90,7 +90,7 @@ export function createProviderTraceObjectStore(
         },
         async decode(bytes) {
           if (bytes.length < 28) throw new Error("invalid_encrypted_trace_object");
-          const cipher = createDecipheriv("aes-256-gcm", key, bytes.subarray(0, 12));
+          const cipher = createDecipheriv("aes-256-gcm", key, bytes.subarray(0, 12), { authTagLength: 16 });
           cipher.setAAD(aad);
           cipher.setAuthTag(bytes.subarray(12, 28));
           return Buffer.concat([cipher.update(bytes.subarray(28)), cipher.final()]);

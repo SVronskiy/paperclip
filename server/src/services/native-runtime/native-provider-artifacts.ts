@@ -652,8 +652,7 @@ export async function restoreNativeProviderArtifacts(input: {
     const decipher = createDecipheriv(
       "aes-256-gcm",
       key,
-      Buffer.from(wrapped.iv, "base64"),
-    );
+      Buffer.from(wrapped.iv, "base64"), { authTagLength: 16 });
     decipher.setAAD(aad(input.companyId, row.id, receipt.closureDigest));
     decipher.setAuthTag(Buffer.from(wrapped.tag, "base64"));
     await pipeline(

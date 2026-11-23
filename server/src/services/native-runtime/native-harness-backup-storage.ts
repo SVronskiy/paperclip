@@ -398,7 +398,7 @@ async function restoreCurrentNativeHarnessBackup(input: {
     if (key.length !== 32) fail("key_invalid");
     const encrypted = join(scratch, "encrypted"), archive = join(scratch, "archive");
     await receive(input.storage, ref, encrypted, input.signal);
-    const decipher = createDecipheriv("aes-256-gcm", key, Buffer.from(wrapped.iv, "base64"));
+    const decipher = createDecipheriv("aes-256-gcm", key, Buffer.from(wrapped.iv, "base64"), { authTagLength: 16 });
     decipher.setAAD(aad(ref)); decipher.setAuthTag(Buffer.from(wrapped.tag, "base64"));
     await pipeline(createReadStream(encrypted), decipher, createWriteStream(archive, { flags: "wx", mode: 0o600 }), { signal: input.signal });
     const actual = await digest(archive, input.signal);

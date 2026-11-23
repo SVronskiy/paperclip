@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { isSafeInternalPath, safeRedirect } from "../routes/safe-redirect.js";
+import { isSafeInternalPath, redirectToValidatedLocation, safeRedirect } from "../routes/safe-redirect.js";
 
 function redirectedTo(target: unknown, options?: Parameters<typeof safeRedirect>[3]) {
   const redirect = vi.fn();
@@ -49,4 +49,21 @@ describe("safe redirects", () => {
     expect(redirectedTo("https://user:pass@github.com/x", options)[1]).toBe("/");
     expect(redirectedTo("https://evil.example/", options)[1]).toBe("/");
   });
+});
+
+describe("redirectToValidatedLocation", () => {
+  function go(target: unknown) {
+    const redirect = vi.fn();
+    redirectToValidatedLocation({ redirect } as never, 303, target);
+    return redirect.mock.calls[0]!;
+  }
+  it("passes internal paths, https URLs and loopback http", () => {
+    expect(go("/issues/1")).toEqual([303, "/issues/1"]);
+    expect(go("https://client.example/cb?code=1")).toEqual([303, "https://client.example/cb?code=1"]);
+    expect(go("http://127.0.0.1:8123/callback")).toEqual([303, "http://127.0.0.1:8123/callback"]);
+  });
+  it.each(["javascript:alert(1)", "data:text/html,x", "//evil.example", "http://evil.example/", "https://u:p@client.example/", undefined, 7])(
+    "replaces %j with the fallback", (target) => {
+      expect(go(target)).toEqual([303, "/"]);
+    });
 });

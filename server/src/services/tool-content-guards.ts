@@ -155,7 +155,7 @@ function readToolArgumentsEnvelope(signedArguments: string, explicitSecret?: str
   // matching the legacy reader and allowing callers to handle them as before.
   const secret = signingSecret(explicitSecret);
   try {
-    const decipher = createDecipheriv("aes-256-gcm", toolArgumentsEncryptionKey(secret), iv);
+    const decipher = createDecipheriv("aes-256-gcm", toolArgumentsEncryptionKey(secret), iv, { authTagLength: 16 });
     decipher.setAAD(Buffer.from(TOOL_ARGUMENTS_ENCRYPTION_CONTEXT));
     decipher.setAuthTag(tag);
     const plaintext = Buffer.concat([decipher.update(ciphertext), decipher.final()]);

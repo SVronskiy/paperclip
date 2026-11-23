@@ -355,7 +355,7 @@ export function openElicitationState(secret: string, scope: { companyId: string;
   const [version, iv, ciphertext, tag] = sealed.split(".");
   if (version !== "v1" || !iv || ciphertext === undefined || !tag) return null;
   try {
-    const decipher = createDecipheriv("aes-256-gcm", stateKey(secret), Buffer.from(iv, "base64url"));
+    const decipher = createDecipheriv("aes-256-gcm", stateKey(secret), Buffer.from(iv, "base64url"), { authTagLength: 16 });
     decipher.setAAD(stateAad(scope));
     decipher.setAuthTag(Buffer.from(tag, "base64url"));
     return Buffer.concat([decipher.update(Buffer.from(ciphertext, "base64url")), decipher.final()]).toString("utf8");
