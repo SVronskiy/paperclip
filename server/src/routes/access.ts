@@ -110,6 +110,7 @@ import {
 import { claimFirstInstanceAdmin } from "../first-admin-claim.js";
 import { getStorageService } from "../storage/index.js";
 import { secretService } from "../services/secrets.js";
+import { gatewayTransportAllowed } from "@paperclipai/adapter-openclaw-gateway";
 
 function hashToken(token: string) {
   return createHash("sha256").update(token).digest("hex");
@@ -891,6 +892,13 @@ export function normalizeAgentDefaultsForJoin(input: {
         fatalErrors.push(
           "agentDefaultsPayload.url must use ws:// or wss:// for openclaw_gateway"
         );
+      } else if (!gatewayTransportAllowed(gatewayUrl)) {
+        diagnostics.push({
+          code: "openclaw_gateway_plaintext_public_ws",
+          level: "warn",
+          message: "Plaintext ws:// is only accepted toward loopback, private-network and tailnet hosts."
+        });
+        fatalErrors.push("agentDefaultsPayload.url must use wss:// for a public gateway host");
       } else {
         normalized.url = gatewayUrl.toString();
         diagnostics.push({

@@ -1,3 +1,4 @@
+export { gatewayTransportAllowed } from "./plaintext-ws.js";
 export const type = "openclaw_gateway";
 export const label = "OpenClaw Gateway";
 

@@ -8,6 +8,8 @@ import { assertAuthenticated, assertBoard, hasCompanyAccess } from "./authz.js";
 import { announcementService } from "../services/announcements.js";
 import { announcementFeedService, type AnnouncementFeedOptions } from "../services/announcement-feed.js";
 
+const ANNOUNCEMENT_IMAGE_TYPES: ReadonlySet<string> = new Set(["image/png", "image/jpeg", "image/webp"]);
+
 export function announcementRoutes(db: Db, options: AnnouncementFeedOptions) {
   const router = Router();
   const feed = announcementFeedService(options);
@@ -29,6 +31,8 @@ export function announcementRoutes(db: Db, options: AnnouncementFeedOptions) {
     if (!id.success) throw badRequest("Invalid announcement ID");
     const image = await feed.image(id.data);
     if (!image) throw notFound("Announcement image unavailable");
+    // Only raster types are served here; the feed already enforces this, the route does not rely on it.
+    if (!ANNOUNCEMENT_IMAGE_TYPES.has(image.contentType)) throw notFound("Announcement image unavailable");
     res.setHeader("Content-Type", image.contentType);
     res.setHeader("X-Content-Type-Options", "nosniff");
     res.send(image.bytes);

@@ -1,3 +1,4 @@
+import { gatewayTransportAllowed } from "../plaintext-ws.js";
 import type {
   AdapterEnvironmentCheck,
   AdapterEnvironmentTestContext,
@@ -226,6 +227,15 @@ export async function testEnvironment(
       level: "error",
       message: `Unsupported URL protocol: ${url.protocol}`,
       hint: "Use ws:// or wss://.",
+    });
+  }
+
+  if (url && !gatewayTransportAllowed(url)) {
+    checks.push({
+      code: "openclaw_gateway_plaintext_public_ws",
+      level: "error",
+      message: "Gateway URL uses plaintext ws:// toward a public host.",
+      hint: "Use wss://. Plaintext ws:// is accepted only for loopback, private-network and tailnet hosts.",
     });
   }
 

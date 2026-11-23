@@ -1,3 +1,4 @@
+import { gatewayTransportAllowed } from "../plaintext-ws.js";
 import type {
   AdapterExecutionContext,
   AdapterExecutionResult,
@@ -1075,6 +1076,18 @@ export async function execute(ctx: AdapterExecutionContext): Promise<AdapterExec
       timedOut: false,
       errorMessage: `Unsupported gateway URL protocol: ${parsedUrl.protocol}`,
       errorCode: "openclaw_gateway_url_protocol",
+    };
+  }
+
+  if (!gatewayTransportAllowed(parsedUrl)) {
+    return {
+      exitCode: 1,
+      signal: null,
+      timedOut: false,
+      errorMessage:
+        "Plaintext ws:// is only allowed toward loopback, private-network and tailnet hosts; use wss:// for this gateway "
+        + "(or set PAPERCLIP_ALLOW_INSECURE_GATEWAY_WS=1 to accept the risk)",
+      errorCode: "openclaw_gateway_plaintext_public_ws",
     };
   }
 
