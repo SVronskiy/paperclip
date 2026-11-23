@@ -51,6 +51,7 @@ const repo = path.resolve(repoArg ?? run("git", ["rev-parse", "--show-toplevel"]
 const only = option("--only")?.split(",").map((id) => id.trim().toUpperCase());
 const withDocker = flag("--with-docker");
 const withScanners = flag("--with-scanners");
+const withApp = flag("--with-app");
 const stamp = new Date().toISOString().replace(/[:.]/g, "-");
 const outDir = path.resolve(option("--out") ?? path.join(here, "results", stamp));
 const probeDir = path.join(outDir, "probes");
@@ -291,13 +292,21 @@ check("E1-5", "shim.tests", "The Go agent shim rejects unsafe commands (go test)
   return result.status === 0 ? pass(tail(result.stdout, 2)) : fail(tail(result.stdout + result.stderr));
 });
 
-check("E1-4", "passwords.embedded", "The embedded development database no longer uses the fixed paperclip/paperclip credentials", () => {
-  const result = run("git", ["grep", "-lE", "paperclip:paperclip@|password: *\"paperclip\"", "--", "server/src", "cli/src", "packages/db/src", "packages/db/scripts", "scripts", ":!**/*.test.*", ":!**/__tests__/**"], { cwd: repo });
+check("E1-4", "passwords.embedded", "The embedded database uses a random per-instance password (no fixed paperclip/paperclip in product code)", () => {
+  const result = run("git", ["grep", "-lE", "paperclip:paperclip@|password: *\"paperclip\"", "--", "server/src", "cli/src", "packages/db/src", "packages/db/scripts", ":!**/*.test.*", ":!**/__tests__/**", ":!packages/db/src/embedded-password.ts", ":!packages/db/src/test-embedded-postgres.ts"], { cwd: repo });
   const files = result.stdout.trim().split("\n").filter(Boolean);
-  return files.length === 0
-    ? pass("no fixed credentials left")
-    : open(`${files.length} file(s) still build the embedded-database connection with the fixed password. The embedded database is for local development only (127.0.0.1) and the pilot must set PAPERCLIP_REQUIRE_EXTERNAL_DATABASE=1 and use an external PostgreSQL. A random password would not stop an agent running as the same OS user, which can read the password file, so closing the agent-isolation items comes first: ${files.join(", ")}`);
+  if (files.length) return fail(`fixed credentials still built in: ${files.join(", ")}`);
+  return vitest("packages/db", ["src/embedded-password.test.ts"]);
 });
+
+check("E1-4", "app.smoke", "The real server starts on a fresh and on a legacy embedded database, serves the API, and moves the legacy password", () => {
+  const result = run("node", [path.join(here, "app-smoke.mjs"), "--repo", repo], { env: process.env });
+  try {
+    const parsed = JSON.parse(result.stdout.trim().split("\n").filter((l) => l.startsWith("{")).pop());
+    const text = parsed.steps.map((st) => `${st.ok ? "ok" : "FAIL"}: ${st.name}${st.detail ? ` (${st.detail})` : ""}`).join("; ");
+    return parsed.ok ? pass(text) : fail(text);
+  } catch { return fail(tail(result.stdout + result.stderr)); }
+}, ["app"]);
 
 // ------------------------------------------------------------- E1-5 .. E1-9
 check("E1-5", "baseline", "Security baseline: no Math.random, MD5/SHA-1 (outside documented protocol uses), shell spawning or built-in telemetry address", () => {
@@ -357,11 +366,28 @@ console.log(JSON.stringify({ leaked }));
   return value.leaked.length ? fail(`redirected to: ${value.leaked.join(", ")}`) : pass("8 payloads all replaced by the fallback");
 });
 
-check("E1-8", "redirect.coverage", "Every res.redirect in the audited routes goes through safeRedirect", () => {
-  const files = ["tool-access.ts", "chat-channels.ts", "tailscale-connections.ts", "slack-tools.ts"].map((f) => `server/src/routes/${f}`);
-  const bad = files.filter((file) => /\bres\.redirect\(/.test(read(file)));
-  return bad.length ? fail(`direct res.redirect in ${bad.join(", ")}`) : pass("4 route files use safeRedirect only");
+check("E1-8", "redirect.coverage", "res.redirect appears only inside safe-redirect.ts across server routes and app.ts", () => {
+  const list = run("git", ["grep", "-lE", "\\bres\\.redirect\\(", "--", "server/src/routes", "server/src/app.ts", ":!**/*.test.*", ":!server/src/routes/safe-redirect.ts"], { cwd: repo });
+  const files = list.stdout.trim().split("\n").filter(Boolean);
+  return files.length ? fail(`direct res.redirect in ${files.join(", ")}`) : pass("every redirect goes through safeRedirect or redirectToValidatedLocation");
 });
+
+check("E1-8", "redirect.validated", "redirectToValidatedLocation blocks javascript:, data:, //host, plain http and credentials", () => vitest("server", ["src/__tests__/safe-redirect.test.ts"]));
+
+check("E1-11", "crypto.gcm", "Every AES-GCM decryption fixes the authentication tag length", () => {
+  const list = run("git", ["grep", "-nE", "createDecipheriv\\(", "--", "server/src", "packages", ":!**/*.test.*", ":!**/node_modules/**"], { cwd: repo });
+  const bad = list.stdout.trim().split("\n").filter((l) => l && /aes-256-gcm/.test(l) && !/authTagLength/.test(l));
+  // Multi-line calls: the algorithm is on the next line, so also scan whole files.
+  const files = [...new Set(list.stdout.trim().split("\n").filter(Boolean).map((l) => l.split(":")[0]))];
+  const multi = files.filter((f) => /createDecipheriv\(\s*\n\s*"aes-256-gcm"[\s\S]*?\)\s*;/.test(read(f)) && !/authTagLength/.test(read(f)));
+  return bad.length || multi.length ? fail([...bad, ...multi].join("; ")) : pass(`${files.length} files, all GCM decipher calls pin authTagLength`);
+});
+
+check("E1-11", "ws.plaintext", "Plaintext ws:// is refused toward public hosts and still works on loopback, private and tailnet hosts", () =>
+  vitest("packages/adapters/openclaw-gateway", ["src/plaintext-ws.test.ts"]));
+
+check("E1-11", "app.adapters", "Gateway adapter, announcements and secret-encryption suites still pass", () =>
+  vitest("server", ["src/__tests__/openclaw-gateway-adapter.test.ts", "src/__tests__/announcements-routes.test.ts", "src/__tests__/local-encrypted-cipher.test.ts", "src/__tests__/mcp-tasks.test.ts", "src/__tests__/mcp-elicitation.test.ts", "src/__tests__/tool-content-guards.test.ts"]));
 
 check("E1-9", "plugin-ui.dotfiles", "Plugin UI static route denies hidden files and keeps dot-directory installs working", () => vitest("server", ["src/__tests__/plugin-ui-static.test.ts"]));
 
@@ -411,6 +437,7 @@ const results = [];
 for (const c of selected) {
   let outcome;
   if (c.needs.includes("docker") && !withDocker) outcome = skip("use --with-docker");
+  else if (c.needs.includes("app") && !withApp) outcome = skip("use --with-app");
   else if (c.needs.includes("scanners") && !withScanners) outcome = skip("use --with-scanners");
   else if (c.needs.includes("docker") && run("docker", ["info"]).status !== 0) outcome = skip("Docker is not running");
   else {
