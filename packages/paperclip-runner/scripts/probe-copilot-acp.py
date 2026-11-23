@@ -14,6 +14,10 @@ resume_group.add_argument('--restart',action='store_true',help='SIGKILL and repl
 parser.add_argument('--tool-policy-node',help='Apply the repository tool policy before native permission dispatch using this Node 24 binary')
 args=parser.parse_args()
 if args.tool_policy_node and args.scenario!='detached-shell':parser.error('--tool-policy-node requires detached-shell')
+if args.tool_policy_node:
+ # The Node binary is launched as a program, so it must be an existing absolute executable file, never a name looked up in PATH or a relative path.
+ _node=pathlib.Path(args.tool_policy_node)
+ if not _node.is_absolute() or not _node.is_file() or not os.access(_node,os.X_OK):parser.error('--tool-policy-node must be an absolute path to an executable file')
 package_root=pathlib.Path(args.package_root).resolve()
 metadata=json.loads((package_root/'package.json').read_text())
 pins={'@github/copilot-darwin-arm64':'a9ff8babb10b7e443182ae96a8bc50a9c826ef1c773e1344c396eb5bf7f512c3','@github/copilot-darwin-x64':'85eb919f6b9b9dd833ce5e326cbf974b3ee2d4a9ac525c59d4ec9c9ec085715b','@github/copilot-linux-x64':'0059754cf78c3f3bf2c9d4564dfa7e9e25f3a3f8f411f2f0cdad9363f5662748'}

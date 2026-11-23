@@ -27,3 +27,35 @@ func TestLoadRuntimeCommandSpec_MissingCommand(t *testing.T) {
 		t.Fatal("expected error for empty command")
 	}
 }
+
+func TestLoadRuntimeCommandSpec_RejectsUnsafeCommands(t *testing.T) {
+	cases := map[string]string{
+		"relative path":    `{"command":"./claude"}`,
+		"parent traversal": `{"command":"../bin/claude"}`,
+		"shell metachar":   `{"command":"claude;rm -rf /"}`,
+		"whitespace":       `{"command":"claude --print"}`,
+		"unclean absolute": `{"command":"/usr/bin/../bin/claude"}`,
+		"nul in command":   `{"command":"claude\u0000"}`,
+		"nul in args":      `{"command":"claude","args":["a\u0000b"]}`,
+		"dot":              `{"command":"."}`,
+	}
+	for name, body := range cases {
+		dir := t.TempDir()
+		p := filepath.Join(dir, "spec.json")
+		_ = os.WriteFile(p, []byte(body), 0o600)
+		if _, err := loadRuntimeCommandSpec(p); err == nil {
+			t.Fatalf("%s: expected the spec to be rejected", name)
+		}
+	}
+}
+
+func TestLoadRuntimeCommandSpec_AcceptsBareNamesAndCleanAbsolutePaths(t *testing.T) {
+	for _, command := range []string{"claude", "claude-code", "codex", "cursor-agent", "/usr/local/bin/claude"} {
+		dir := t.TempDir()
+		p := filepath.Join(dir, "spec.json")
+		_ = os.WriteFile(p, []byte(`{"command":"`+command+`","args":["--print","a b"]}`), 0o600)
+		if _, err := loadRuntimeCommandSpec(p); err != nil {
+			t.Fatalf("%s: expected ok, got %v", command, err)
+		}
+	}
+}
