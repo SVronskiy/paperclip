@@ -1627,6 +1627,7 @@ function decryptSecureJson(
     "aes-256-gcm",
     channel.receiveKey,
     secureNonce("P3C1", counter),
+    { authTagLength: 16 },
   );
   decipher.setAAD(secureAad(channel, "client_to_core", counter));
   decipher.setAuthTag(tag);
