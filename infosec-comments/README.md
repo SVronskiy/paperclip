@@ -5,6 +5,8 @@
 - [SECURITY-REMEDIATION-PLAN.md](SECURITY-REMEDIATION-PLAN.md) — план устранения замечаний команды безопасности ПО (БПО), команды безопасной разработки (БР) и собственной проверки (Opus).
 - `reports/` — сырые отчёты проверок, на которые ссылается план.
 - [br-findings-registry.csv](br-findings-registry.csv) — реестр 159 находок команды безопасной разработки (выгрузка DefectDojo: Semgrep, Horusec, Dependency-Track) с сопоставлением с текущей ревизией, пунктом плана, оценкой и действием. Исходные HTML-отчёты не включены: в них есть внутренние адреса.
+- [stage1-registry.csv](stage1-registry.csv) — реестр этапа 1 (967 строк): находки БР и всё, что те же сканеры (Semgrep с наборами правил БР, Horusec 2.8.0) выдают на текущей ревизии, с потоком этапа, происхождением и действием.
+- `reports/stage1/` — сырые отчёты повторного прогона 2026-11-23 (`semgrep-br-rulesets.json`, `horusec.json` по каталогам), SBOM текущей ревизии для Dependency-Track (`sbom-cyclonedx.json`) и скрипты сопоставления (`compare.py`, `stage1.py`, `hs-run.sh`; входные данные — разобранная выгрузка DefectDojo, в репозиторий не включена). Контрольные суммы — `reports/stage1/SHA256SUMS`.
 
 Проверки выполнены 2026-11-19 по ревизии `master` @ `3dffb2c9d`.
 
@@ -15,7 +17,7 @@
 Контрольные суммы всех файлов в `reports/` — в `reports/SHA256SUMS`. Проверка:
 
 ```bash
-cd infosec-comments/reports && shasum -a 256 -c SHA256SUMS
+cd infosec-comments/reports && shasum -a 256 -c SHA256SUMS && (cd stage1 && shasum -a 256 -c SHA256SUMS)
 ```
 
 | Файл | Инструмент | Что внутри |
