@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(/Users/mac/repos/paperclip/packages/adapter-utils/scripts/paperclip-issue-update.sh:*)",
+      "Bash(/Users/mac/repos/paperclip/packages/adapter-utils/scripts/paperclip:*)",
+      "Bash(curl:*)",
+      "Bash(env)",
+      "Bash(env:*)"
+    ],
+    "additionalDirectories": [
+      "/Users/mac/.paperclip/instances/default/companies/company-1",
+      "/Users/mac/.paperclip/instances/default/companies/company-1/acp-engine/agents/agent-1",
+      "/var/folders/48/y7dlw8vd2b7bxk3nq6nvhzgw0000gn/T/paperclip-acpx-skills-2OYK9h/state",
+      "/var/folders/48/y7dlw8vd2b7bxk3nq6nvhzgw0000gn/T/paperclip-acpx-skills-8UAOHA/state",
+      "/var/folders/48/y7dlw8vd2b7bxk3nq6nvhzgw0000gn/T/paperclip-acpx-skills-8iAcgs/state",
+      "/var/folders/48/y7dlw8vd2b7bxk3nq6nvhzgw0000gn/T/paperclip-acpx-skills-EG0KMi/state",
+      "/var/folders/48/y7dlw8vd2b7bxk3nq6nvhzgw0000gn/T/paperclip-acpx-skills-FkoUVM/state",
+      "/var/folders/48/y7dlw8vd2b7bxk3nq6nvhzgw0000gn/T/paperclip-acpx-skills-UymS0p/state",
+      "/var/folders/48/y7dlw8vd2b7bxk3nq6nvhzgw0000gn/T/paperclip-acpx-skills-gVz7m6/state",
+      "/var/folders/48/y7dlw8vd2b7bxk3nq6nvhzgw0000gn/T/paperclip-acpx-skills-sWrfRS/state",
+      "/var/folders/48/y7dlw8vd2b7bxk3nq6nvhzgw0000gn/T/paperclip-acpx-skills-yVn3GM/state",
+      "/var/folders/48/y7dlw8vd2b7bxk3nq6nvhzgw0000gn/T/paperclip-acpx-skills-zZ7zfa/state"
+    ],
+    "defaultMode": "default"
+  }
+}

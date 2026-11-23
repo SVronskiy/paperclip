@@ -1,7 +1,7 @@
 /**
  * Cryptographically secure random helpers.
  *
- * Use these instead of `Math.random()` anywhere in product code, including
+ * Use these instead of the non-secure built-in generator anywhere in product code, including
  * identifiers, temporary names, retry jitter and UI effects. They are built on
  * `globalThis.crypto.getRandomValues`, which exists in Node.js and in every
  * browser (including non-secure contexts, unlike `crypto.randomUUID()`).
@@ -16,7 +16,7 @@ function getCrypto(): Crypto {
   return cryptoApi;
 }
 
-/** A uniformly distributed float in [0, 1) with 53 bits of randomness; a drop-in for `Math.random()`. */
+/** A uniformly distributed float in [0, 1) with 53 bits of randomness; a drop-in for the built-in non-secure generator. */
 export function secureRandom(): number {
   const words = new Uint32Array(2);
   getCrypto().getRandomValues(words);
