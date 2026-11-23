@@ -358,7 +358,7 @@
     "packages/shared/src/runtime-exposure/ports.test.ts": "de27b2c17db88c65f9f4e7240d9fae969dd1551e",
     "packages/shared/src/runtime-exposure/ports.ts": "6566d780a36c4eb37fab5584db19714f596654b7",
     "packages/shared/src/secure-random.test.ts": "156826fef53146eb307cc2c740f89813b6bc699c",
-    "packages/shared/src/secure-random.ts": "a7ee9d0f8d37c0f9747b53cb1ae13f96e6871c27",
+    "packages/shared/src/secure-random.ts": "29eaee1c3044d8850b23aa37fe4bcf9ecf9a0166",
     "packages/shared/src/self-serve-mcp-research.json": "98a90544e8e00b31350b5c07e39940429bc026b9",
     "packages/shared/src/self-serve-mcp-research.ts": "312abfecb0dbac8a0e5bf80fb8e3467ca94f500f",
     "packages/shared/src/setting-defaults.test.ts": "f5554686f7bf9cc34f14cdd4505257dcc562d410",
