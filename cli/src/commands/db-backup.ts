@@ -1,3 +1,4 @@
+import { embeddedPostgresUrl, resolveEmbeddedPostgresPassword } from "@paperclipai/db/embedded-password";
 import path from "node:path";
 import * as p from "@clack/prompts";
 import pc from "picocolors";
@@ -5,6 +6,7 @@ import { formatDatabaseBackupResult, runDatabaseBackup } from "@paperclipai/db";
 import {
   expandHomePrefix,
   resolveDefaultBackupDir,
+  resolveDefaultEmbeddedPostgresDir,
   resolvePaperclipInstanceId,
 } from "../config/home.js";
 import { readConfig, resolveConfigPath } from "../config/store.js";
@@ -29,7 +31,7 @@ function resolveConnectionString(configPath?: string): { value: string; source: 
 
   const port = config?.database.embeddedPostgresPort ?? 54329;
   return {
-    value: `postgres://paperclip:paperclip@127.0.0.1:${port}/paperclip`,
+    value: embeddedPostgresUrl(config?.database.embeddedPostgresDataDir ?? resolveDefaultEmbeddedPostgresDir(), port, "paperclip"),
     source: `embedded-postgres@${port}`,
   };
 }

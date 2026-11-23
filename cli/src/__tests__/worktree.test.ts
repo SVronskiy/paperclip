@@ -1,3 +1,4 @@
+import { embeddedPostgresUrl } from "@paperclipai/db/embedded-password";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -1632,7 +1633,7 @@ describe("worktree helpers", () => {
         targetPgStartupResolved = true;
         onTestFinished(() => targetPg.stop());
         const targetDb = createDb(
-          `postgres://paperclip:paperclip@127.0.0.1:${targetConfig.database.embeddedPostgresPort}/paperclip`,
+          embeddedPostgresUrl(targetConfig.database.embeddedPostgresDataDir, targetConfig.database.embeddedPostgresPort, "paperclip"),
         );
         const [seededLocalBoard] = await targetDb
           .select({ id: authUsers.id })
@@ -1819,7 +1820,7 @@ describe("worktree helpers", () => {
       await targetPg.start();
       onTestFinished(() => targetPg.stop());
       const targetDb = createDb(
-        `postgres://paperclip:paperclip@127.0.0.1:${targetConfig.database.embeddedPostgresPort}/paperclip`,
+        embeddedPostgresUrl(targetConfig.database.embeddedPostgresDataDir, targetConfig.database.embeddedPostgresPort, "paperclip"),
       );
       const seededUsers = await targetDb.select().from(authUsers);
       expect(seededUsers.some((row) => row.email === "existing@paperclip.ing")).toBe(true);

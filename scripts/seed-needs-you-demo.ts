@@ -1,3 +1,4 @@
+import { embeddedPostgresUrl, resolveEmbeddedPostgresPassword } from "@paperclipai/db/embedded-password";
 /**
  * scripts/seed-needs-you-demo.ts
  *
@@ -154,7 +155,7 @@ function resolveDatabaseUrl(): string {
   if (fromEnv) return fromEnv;
   const config = loadConfig();
   if (config.databaseUrl) return config.databaseUrl;
-  return `postgres://paperclip:paperclip@127.0.0.1:${config.embeddedPostgresPort}/paperclip`;
+  return embeddedPostgresUrl(config.embeddedPostgresDataDir, config.embeddedPostgresPort, "paperclip");
 }
 
 async function main() {

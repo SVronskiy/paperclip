@@ -1,3 +1,4 @@
+import { embeddedPostgresUrl, resolveEmbeddedPostgresPassword } from "./embedded-password.js";
 import { existsSync, readFileSync, rmSync } from "node:fs";
 import { createServer } from "node:net";
 import path from "node:path";
@@ -99,7 +100,7 @@ async function ensureEmbeddedPostgresConnection(
   const pgVersionFile = path.resolve(dataDir, "PG_VERSION");
   const runningPid = readRunningPostmasterPid(postmasterPidFile);
   const runningPort = readPidFilePort(postmasterPidFile);
-  const preferredAdminConnectionString = `postgres://paperclip:paperclip@127.0.0.1:${preferredPort}/postgres`;
+  const preferredAdminConnectionString = embeddedPostgresUrl(dataDir, preferredPort, "postgres");
   const logBuffer = createEmbeddedPostgresLogBuffer();
 
   if (!runningPid && existsSync(pgVersionFile)) {
@@ -116,7 +117,7 @@ async function ensureEmbeddedPostgresConnection(
         `Adopting an existing PostgreSQL instance on port ${preferredPort} for embedded data dir ${dataDir} because postmaster.pid is missing.`,
       );
       return {
-        connectionString: `postgres://paperclip:paperclip@127.0.0.1:${preferredPort}/paperclip`,
+        connectionString: embeddedPostgresUrl(dataDir, preferredPort, "paperclip"),
         source: `embedded-postgres@${preferredPort}`,
         stop: async () => {},
       };
@@ -127,10 +128,10 @@ async function ensureEmbeddedPostgresConnection(
 
   if (runningPid) {
     const port = runningPort ?? preferredPort;
-    const adminConnectionString = `postgres://paperclip:paperclip@127.0.0.1:${port}/postgres`;
+    const adminConnectionString = embeddedPostgresUrl(dataDir, port, "postgres");
     await ensurePostgresDatabase(adminConnectionString, "paperclip");
     return {
-      connectionString: `postgres://paperclip:paperclip@127.0.0.1:${port}/paperclip`,
+      connectionString: embeddedPostgresUrl(dataDir, port, "paperclip"),
       source: `embedded-postgres@${port}`,
       stop: async () => {},
     };
@@ -139,7 +140,7 @@ async function ensureEmbeddedPostgresConnection(
   const instance = new EmbeddedPostgres({
     databaseDir: dataDir,
     user: "paperclip",
-    password: "paperclip",
+    password: resolveEmbeddedPostgresPassword(dataDir),
     port: selectedPort,
     persistent: true,
     initdbFlags: ["--encoding=UTF8", "--locale=C", "--lc-messages=C"],
@@ -170,11 +171,11 @@ async function ensureEmbeddedPostgresConnection(
     });
   }
 
-  const adminConnectionString = `postgres://paperclip:paperclip@127.0.0.1:${selectedPort}/postgres`;
+  const adminConnectionString = embeddedPostgresUrl(dataDir, selectedPort, "postgres");
   await ensurePostgresDatabase(adminConnectionString, "paperclip");
 
   return {
-    connectionString: `postgres://paperclip:paperclip@127.0.0.1:${selectedPort}/paperclip`,
+    connectionString: embeddedPostgresUrl(dataDir, selectedPort, "paperclip"),
     source: `embedded-postgres@${selectedPort}`,
     stop: async () => {
       await instance.stop();

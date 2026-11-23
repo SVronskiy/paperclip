@@ -1,3 +1,4 @@
+import { embeddedPostgresUrl, resolveEmbeddedPostgresPassword } from "@paperclipai/db/embedded-password";
 import fs from "node:fs";
 import net from "node:net";
 import path from "node:path";
@@ -134,7 +135,7 @@ async function ensureEmbeddedPostgres(dataDir: string, preferredPort: number): P
   const instance = new EmbeddedPostgres({
     databaseDir: dataDir,
     user: "paperclip",
-    password: "paperclip",
+    password: resolveEmbeddedPostgresPassword(dataDir),
     port,
     persistent: true,
     initdbFlags: ["--encoding=UTF8", "--locale=C", "--lc-messages=C"],
@@ -195,9 +196,9 @@ async function openConfiguredDb(configPath: string): Promise<{
         config.database.embeddedPostgresDataDir,
         config.database.embeddedPostgresPort,
       );
-      const adminConnectionString = `postgres://paperclip:paperclip@127.0.0.1:${embeddedHandle.port}/postgres`;
+      const adminConnectionString = embeddedPostgresUrl(config.database.embeddedPostgresDataDir, embeddedHandle.port, "postgres");
       await ensurePostgresDatabase(adminConnectionString, "paperclip");
-      const connectionString = `postgres://paperclip:paperclip@127.0.0.1:${embeddedHandle.port}/paperclip`;
+      const connectionString = embeddedPostgresUrl(config.database.embeddedPostgresDataDir, embeddedHandle.port, "paperclip");
       await applyPendingMigrations(connectionString);
       const db = createDb(connectionString) as ClosableDb;
       return {
@@ -258,9 +259,9 @@ export async function disableAllRoutinesInConfig(
         config.database.embeddedPostgresDataDir,
         config.database.embeddedPostgresPort,
       );
-      const adminConnectionString = `postgres://paperclip:paperclip@127.0.0.1:${embeddedHandle.port}/postgres`;
+      const adminConnectionString = embeddedPostgresUrl(config.database.embeddedPostgresDataDir, embeddedHandle.port, "postgres");
       await ensurePostgresDatabase(adminConnectionString, "paperclip");
-      const connectionString = `postgres://paperclip:paperclip@127.0.0.1:${embeddedHandle.port}/paperclip`;
+      const connectionString = embeddedPostgresUrl(config.database.embeddedPostgresDataDir, embeddedHandle.port, "paperclip");
       await applyPendingMigrations(connectionString);
       db = createDb(connectionString) as ClosableDb;
     } else {

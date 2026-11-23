@@ -1,3 +1,4 @@
+import { embeddedPostgresUrl } from "../src/embedded-password.js";
 #!/usr/bin/env tsx
 /**
  * One-shot cleaner for `agent_task_sessions` rows whose persisted `claude_local`
@@ -213,6 +214,7 @@ function readDatabaseUrlFromConfig(configPath: string): string {
     database?: {
       mode?: string;
       embeddedPostgresPort?: number;
+      embeddedPostgresDataDir?: string;
       connectionString?: string;
     };
   };
@@ -220,7 +222,8 @@ function readDatabaseUrlFromConfig(configPath: string): string {
     return parsed.database.connectionString;
   }
   const port = parsed.database?.embeddedPostgresPort ?? 54329;
-  return `postgres://paperclip:paperclip@127.0.0.1:${port}/paperclip`;
+  const dataDir = parsed.database?.embeddedPostgresDataDir ?? path.join(path.dirname(path.resolve(configPath)), "db");
+  return embeddedPostgresUrl(dataDir, port, "paperclip");
 }
 
 function defaultConfigPath(): string | null {

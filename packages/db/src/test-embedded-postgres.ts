@@ -124,7 +124,8 @@ async function getAvailablePort(): Promise<number> {
 }
 
 const EMBEDDED_POSTGRES_USER = "paperclip";
-const EMBEDDED_POSTGRES_PASSWORD = "paperclip";
+// Throwaway test cluster on a random loopback port; cached templates bake this value in.
+const EMBEDDED_POSTGRES_PASSWORD = "paperclip"; // security-baseline-allow: test-only cluster
 const EMBEDDED_POSTGRES_INITDB_FLAGS = ["--encoding=UTF8", "--locale=C", "--lc-messages=C"];
 
 async function createEmbeddedPostgresTestInstance(tempDirPrefix: string) {

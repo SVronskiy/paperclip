@@ -1,3 +1,4 @@
+import { embeddedPostgresUrl } from "../src/embedded-password.js";
 import { createHash, randomBytes } from "node:crypto";
 import { readFileSync, realpathSync } from "node:fs";
 import path from "node:path";
@@ -52,7 +53,7 @@ async function main() {
   const dbUrl =
     config.database?.mode === "postgres"
       ? config.database.connectionString
-      : `postgres://paperclip:paperclip@127.0.0.1:${embeddedPort}/paperclip`;
+      : embeddedPostgresUrl(config.database?.embeddedPostgresDataDir ?? "", embeddedPort ?? 0, "paperclip");
   if (!dbUrl) {
     throw new Error(`Could not resolve database connection from ${configPath}`);
   }

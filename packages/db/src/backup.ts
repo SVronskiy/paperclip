@@ -1,9 +1,11 @@
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
+import { embeddedPostgresUrl } from "./embedded-password.js";
 import { formatDatabaseBackupResult, runDatabaseBackup } from "./backup-lib.js";
 import {
   expandHomePrefix,
   resolveDefaultBackupDir,
+  resolveDefaultEmbeddedPostgresDir,
   resolvePaperclipConfigPathForInstance,
 } from "@paperclipai/shared/home-paths";
 
@@ -12,6 +14,7 @@ type PartialConfig = {
     mode?: "embedded-postgres" | "postgres";
     connectionString?: string;
     embeddedPostgresPort?: number;
+    embeddedPostgresDataDir?: string;
     backup?: {
       dir?: string;
       retentionDays?: number;
@@ -49,7 +52,10 @@ function resolveConnectionString(config: PartialConfig | null): string {
   }
 
   const port = resolveEmbeddedPort(config);
-  return `postgres://paperclip:paperclip@127.0.0.1:${port}/paperclip`;
+  const dataDir = config?.database?.embeddedPostgresDataDir?.trim()
+    ? path.resolve(expandHomePrefix(config.database.embeddedPostgresDataDir.trim()))
+    : resolveDefaultEmbeddedPostgresDir({});
+  return embeddedPostgresUrl(dataDir, port, "paperclip");
 }
 
 function resolveBackupDir(config: PartialConfig | null): string {

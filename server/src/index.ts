@@ -95,6 +95,11 @@ import { waitForPendingRunFailureReports } from "./services/run-failure-report.j
 import { verifyStoppedNativeSessionForAutomaticReplacement } from "./services/native-runtime/native-session-executor.js";
 import { registerNativeCleanupReleaseWake } from "./services/native-runtime/native-cleanup-release-wake.js";
 import { logNativeCleanupQuarantines } from "./services/native-runtime/native-cleanup-quarantine-log.js";
+import {
+  embeddedPostgresUrl,
+  resolveEmbeddedPostgresPassword,
+  upgradeLegacyEmbeddedPasswordOnPort,
+} from "@paperclipai/db/embedded-password";
 import { embeddedPostgresOwnerPort } from "./embedded-postgres-owner.js";
 import { deliverExecutionStatuses } from "./services/execution-status-delivery.js";
 import { registerNativeRestartRecheck } from "./services/recovery/ownership-registry.js";
@@ -636,13 +641,13 @@ async function startServerWithDatabaseTeardown(
     const runningPid = getRunningPid();
     if (runningPid) {
       port = embeddedPostgresOwnerPort(readFileSync(postmasterPidFile, "utf8"), dataDir, runningPid);
-      const actualDataDir = await getPostgresDataDirectory(`postgres://paperclip:paperclip@127.0.0.1:${port}/postgres`);
+      const actualDataDir = await getPostgresDataDirectory(embeddedPostgresUrl(dataDir, port, "postgres"));
       if (typeof actualDataDir !== "string" || resolve(actualDataDir) !== resolve(dataDir)) {
         throw new Error("Refusing to reuse PostgreSQL: its data directory belongs to another instance.");
       }
       logger.warn(`Embedded PostgreSQL already running; reusing existing process (pid=${runningPid}, port=${port})`);
     } else {
-      const configuredAdminConnectionString = `postgres://paperclip:paperclip@127.0.0.1:${configuredPort}/postgres`;
+      const configuredAdminConnectionString = embeddedPostgresUrl(dataDir, configuredPort, "postgres");
       try {
         const actualDataDir = await getPostgresDataDirectory(configuredAdminConnectionString);
         if (
@@ -665,7 +670,7 @@ async function startServerWithDatabaseTeardown(
         const createEmbeddedPostgres = () => new EmbeddedPostgres({
           databaseDir: dataDir,
           user: "paperclip",
-          password: "paperclip",
+          password: resolveEmbeddedPostgresPassword(dataDir),
           port,
           persistent: true,
           initdbFlags: ["--encoding=UTF8", "--locale=C", "--lc-messages=C"],
@@ -735,13 +740,16 @@ async function startServerWithDatabaseTeardown(
       }
     }
   
-    const embeddedAdminConnectionString = `postgres://paperclip:paperclip@127.0.0.1:${port}/postgres`;
+    await upgradeLegacyEmbeddedPasswordOnPort(dataDir, port).catch((err) => {
+      logger.warn({ err }, "Could not replace the legacy embedded PostgreSQL password");
+    });
+    const embeddedAdminConnectionString = embeddedPostgresUrl(dataDir, port, "postgres");
     const dbStatus = await ensurePostgresDatabase(embeddedAdminConnectionString, "paperclip");
     if (dbStatus === "created") {
       logger.info("Created embedded PostgreSQL database: paperclip");
     }
   
-    const embeddedConnectionString = `postgres://paperclip:paperclip@127.0.0.1:${port}/paperclip`;
+    const embeddedConnectionString = embeddedPostgresUrl(dataDir, port, "paperclip");
     const shouldAutoApplyFirstRunMigrations = !clusterAlreadyInitialized || dbStatus === "created";
     if (shouldAutoApplyFirstRunMigrations) {
       logger.info("Detected first-run embedded PostgreSQL setup; applying pending migrations automatically");
