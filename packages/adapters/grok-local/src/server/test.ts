@@ -1,3 +1,4 @@
+import { secureRandom } from "@paperclipai/shared/secure-random";
 import type {
   AdapterEnvironmentCheck,
   AdapterEnvironmentTestContext,
@@ -121,7 +122,7 @@ export async function testEnvironment(
   const targetLabel = targetIsRemote
     ? ctx.environmentName ?? describeAdapterExecutionTarget(target)
     : null;
-  const runId = `grok-envtest-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  const runId = `grok-envtest-${Date.now()}-${secureRandom().toString(16).slice(2)}`;
 
   if (targetLabel) {
     checks.push({

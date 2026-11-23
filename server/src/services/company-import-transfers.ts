@@ -1,3 +1,4 @@
+import { secureRandom } from "@paperclipai/shared/secure-random";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import type { Db } from "@paperclipai/db";
@@ -74,7 +75,7 @@ export async function writeImportTransferPart(
   const target = partPathFor(spoolRoot, runId, index);
   try {
     await fs.mkdir(path.dirname(target), { recursive: true });
-    const tempPath = `${target}.tmp-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const tempPath = `${target}.tmp-${Date.now()}-${secureRandom().toString(36).slice(2, 8)}`;
     await fs.writeFile(tempPath, bytes);
     await fs.rename(tempPath, target);
   } finally {

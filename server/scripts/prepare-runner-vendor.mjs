@@ -83,8 +83,8 @@ export function runBuildCommand(command, { cwd, env = process.env }) {
     cwd,
     env,
     stdio: "inherit",
-    // A bare `pnpm` on Windows is pnpm.cmd, which needs the shell to resolve.
-    shell: pnpm.command === "pnpm" && process.platform === "win32",
+    // Never a shell: the pnpm entry point is resolved by resolvePnpmInvocation.
+    shell: false,
   });
   if (result.error) throw result.error;
   return result.status ?? 1;

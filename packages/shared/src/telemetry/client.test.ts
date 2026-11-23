@@ -456,48 +456,39 @@ describe("TelemetryClient batched retry + backoff", () => {
     client.stop();
   });
 
-  // Issue 1 (PR #9946): a transient upstream 5xx on the primary endpoint must
-  // fall through to the healthy secondary endpoint instead of returning early.
-  it("falls through to the secondary endpoint on a transient 5xx", async () => {
-    const fetchMock = vi
-      .fn()
-      .mockResolvedValueOnce({ ok: false, status: 503 }) // primary endpoint: transient
-      .mockResolvedValueOnce({ ok: true }); // secondary endpoint: healthy
+  // There is no built-in collector address: with no endpoint configured the
+  // client must never call fetch, and must not queue the batch for retry.
+  it("does not send or retry when no endpoint is configured", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true });
     vi.stubGlobal("fetch", fetchMock);
-    // Empty endpoint => the two built-in DEFAULT_ENDPOINTS are used.
     const { client } = makeClient(undefined, { endpoint: "" });
 
     client.track("install.started", {});
     await client.flush();
-
-    // Both endpoints tried within a single attempt; delivered on the secondary,
-    // so no retry is queued.
-    expect(fetchMock).toHaveBeenCalledTimes(2);
     await vi.advanceTimersByTimeAsync(120_000);
-    expect(fetchMock).toHaveBeenCalledTimes(2);
+
+    expect(fetchMock).not.toHaveBeenCalled();
     client.stop();
   });
 
-  // Issue 1 (PR #9946): when every endpoint returns a transient 5xx the status
-  // is still surfaced as retryable (not swallowed).
-  it("surfaces the transient status for retry when all endpoints 5xx", async () => {
+  // A transient upstream 5xx on the configured endpoint is retried with backoff.
+  it("retries a transient 5xx on the configured endpoint", async () => {
     const fetchMock = vi
       .fn()
-      .mockResolvedValueOnce({ ok: false, status: 502 }) // primary
-      .mockResolvedValueOnce({ ok: false, status: 502 }) // secondary
-      .mockResolvedValue({ ok: true }); // retry succeeds
+      .mockResolvedValueOnce({ ok: false, status: 502 })
+      .mockResolvedValue({ ok: true });
     vi.stubGlobal("fetch", fetchMock);
     const { client } = makeClient(undefined, {
-      endpoint: "",
+      endpoint: "http://localhost:9999/ingest",
       backoff: { baseDelayMs: 1_000, maxDelayMs: 30_000, maxAttempts: 5, jitterRatio: 0.25 },
     });
 
     client.track("install.started", {});
     await client.flush();
-    expect(fetchMock).toHaveBeenCalledTimes(2); // both endpoints 502 -> queued for retry
+    expect(fetchMock).toHaveBeenCalledTimes(1); // 502 -> queued for retry
 
-    await vi.advanceTimersByTimeAsync(1_000); // attempt 2 -> ok on primary
-    expect(fetchMock).toHaveBeenCalledTimes(3);
+    await vi.advanceTimersByTimeAsync(1_000);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
     client.stop();
   });
 

@@ -373,13 +373,14 @@ The `docker/quadlet/` directory contains unit files to run Paperclip + PostgreSQ
 3. Create a secrets env file (keep out of version control):
 
    ```sh
+   DB_PASSWORD=$(openssl rand -hex 24)
    cat > ~/.config/containers/systemd/paperclip.env <<EOL
    BETTER_AUTH_SECRET=$(openssl rand -hex 32)
    PAPERCLIP_TOOL_ACTION_SIGNING_SECRET=$(openssl rand -hex 32)
    POSTGRES_USER=paperclip
-   POSTGRES_PASSWORD=paperclip
+   POSTGRES_PASSWORD=$DB_PASSWORD
    POSTGRES_DB=paperclip
-   DATABASE_URL=postgres://paperclip:paperclip@127.0.0.1:5432/paperclip
+   DATABASE_URL=postgres://paperclip:$DB_PASSWORD@127.0.0.1:5432/paperclip
    # OPENAI_API_KEY=sk-...
    # ANTHROPIC_API_KEY=sk-...
    EOL

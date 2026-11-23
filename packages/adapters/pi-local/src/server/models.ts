@@ -1,4 +1,4 @@
-import { createHash } from "node:crypto";
+import { createHash, randomBytes } from "node:crypto";
 import type { AdapterModel } from "@paperclipai/adapter-utils";
 import { asString, runChildProcess, sanitizeInheritedPaperclipEnv } from "@paperclipai/adapter-utils/server-utils";
 
@@ -111,7 +111,7 @@ export async function discoverPiModels(input: {
   const runtimeEnv = normalizeEnv({ ...sanitizeInheritedPaperclipEnv(process.env), ...env });
 
   const result = await runChildProcess(
-    `pi-models-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+    `pi-models-${Date.now()}-${randomBytes(8).toString("hex")}`,
     command,
     ["--list-models"],
     {

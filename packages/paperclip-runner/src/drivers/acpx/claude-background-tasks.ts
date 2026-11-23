@@ -107,6 +107,7 @@ export class ClaudeBackgroundTaskTracker {
     if (backgroundTaskId !== undefined) {
       this.#observedTask = true;
       const taskId = this.#taskId(backgroundTaskId);
+      // security-baseline-allow: `shell` marks a background shell task in the tracker; nothing is spawned here
       if (taskId !== null && !this.#tasks.has(taskId)) this.#track(taskId, { shell: true, live: true });
     }
     if (kind === "tool_call" && typeof claudeCode.toolName === "string" && SCHEDULING_TOOLS.has(claudeCode.toolName)) {

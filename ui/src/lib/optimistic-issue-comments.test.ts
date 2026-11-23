@@ -19,6 +19,17 @@ import {
   upsertIssueCommentInPages,
 } from "./optimistic-issue-comments";
 
+
+/** A `crypto.getRandomValues` stand-in that makes `secureRandom()` return `value`. */
+function fakeRandomValues(value: number) {
+  const scaled = Math.round(value * 2 ** 53);
+  return (target: Uint32Array) => {
+    target[0] = Math.floor(scaled / 2 ** 26) * 32;
+    target[1] = (scaled % 2 ** 26) * 64;
+    return target;
+  };
+}
+
 describe("optimistic issue comments", () => {
   it("immediately replaces a derived status when a task moves or reopens", () => {
     const monitoring = { status: "in_progress", displayStatus: "monitoring" } as Issue;
@@ -51,9 +62,8 @@ describe("optimistic issue comments", () => {
   });
 
   it("falls back when crypto.randomUUID is unavailable", () => {
-    vi.stubGlobal("crypto", {});
+    vi.stubGlobal("crypto", { getRandomValues: fakeRandomValues(0.123456789) });
     const nowSpy = vi.spyOn(Date, "now").mockReturnValue(1_746_000_000_000);
-    const mathSpy = vi.spyOn(Math, "random").mockReturnValue(0.123456789);
 
     const comment = createOptimisticIssueComment({
       companyId: "company-1",
@@ -66,7 +76,6 @@ describe("optimistic issue comments", () => {
     expect(comment.clientId).toBe(comment.id);
 
     nowSpy.mockRestore();
-    mathSpy.mockRestore();
   });
 
   it("supports queued optimistic comments for active-run follow-ups", () => {

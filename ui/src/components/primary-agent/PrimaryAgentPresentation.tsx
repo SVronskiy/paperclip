@@ -1,3 +1,4 @@
+import { secureRandom } from "@paperclipai/shared/secure-random";
 import { createContext, useContext, useRef, useState, type CSSProperties } from "react";
 import { ArrowRight, Crown } from "lucide-react";
 import type { Agent } from "@paperclipai/shared";
@@ -45,11 +46,11 @@ const crownClass = "primary-crown relative";
 type CrownPop = { timing: "now" | "after-dialog"; bubbles: { angle: number; size: number; travel: number }[] };
 
 function crownBubbles(): CrownPop["bubbles"] {
-  const start = Math.random() * 360;
+  const start = secureRandom() * 360;
   return [0, 1, 2].map((index) => ({
-    angle: Math.round(start + index * 120 + (Math.random() - 0.5) * 60),
-    size: Number((0.45 + Math.random() * 0.55).toFixed(2)),
-    travel: Number((0.8 + Math.random() * 0.4).toFixed(2)),
+    angle: Math.round(start + index * 120 + (secureRandom() - 0.5) * 60),
+    size: Number((0.45 + secureRandom() * 0.55).toFixed(2)),
+    travel: Number((0.8 + secureRandom() * 0.4).toFixed(2)),
   }));
 }
 

@@ -15,6 +15,7 @@ import { useResilientFetch } from "@/hooks/useResilientFetch";
 import { api } from "../api/client";
 import { describeError } from "../api/errors";
 import { cn } from "@/lib/utils";
+import { navigateIfSafe } from "@/lib/safe-navigation";
 import { ANALYTICS_NO_CAPTURE_CLASS } from "@/lib/analytics/privacy";
 
 const PAIRING_CODE_PATTERN = /^[A-Za-z0-9_-]{32}$/;
@@ -58,6 +59,7 @@ function McpConnectRequest({ id, device = false, agentPairingOnly = false, onEdi
   const [pairingCode, setPairingCode] = useState("");
   const [writeEnabled, setWriteEnabled] = useState(true);
   const [deviceResult, setDeviceResult] = useState<"approved" | "denied" | null>(null);
+  const [redirectBlocked, setRedirectBlocked] = useState(false);
   const request = useQuery({ queryKey: [device ? "mcp-device" : agentPairingOnly ? "dot-mcp-request" : "mcp-request", id], queryFn: () => api.get<McpConnectionRequest>(device ? `/mcp/device?user_code=${encodeURIComponent(id)}` : `${requestPrefix}/${encodeURIComponent(id)}`) });
   const requestView = useQueryView(request);
   const data = request.data;
@@ -88,11 +90,11 @@ function McpConnectRequest({ id, device = false, agentPairingOnly = false, onEdi
   const allowConfiguration = Boolean(data?.requestedConfigure && canApproveWrites);
   const consent = useMutation({
     mutationFn: (decision: "approve" | "deny") => api.post<{ redirectUrl?: string; status?: "approved" | "denied" }>(device ? "/mcp/device/consent" : `/mcp/requests/${encodeURIComponent(id)}/consent`, { decision, companyId: selectedCompanyId || undefined, allowWrites: decision === "approve" && allowWrites, allowConfiguration: decision === "approve" && allowConfiguration, ...(device ? { userCode: id } : {}) }),
-    onSuccess: ({ redirectUrl, status }) => { if (device && status) setDeviceResult(status); else if (redirectUrl) window.location.assign(redirectUrl); },
+    onSuccess: ({ redirectUrl, status }) => { if (device && status) setDeviceResult(status); else if (redirectUrl && !navigateIfSafe(redirectUrl)) setRedirectBlocked(true); },
   });
   const pairDot = useMutation({
     mutationFn: () => api.post<{ redirectUrl: string }>(`${requestPrefix}/${encodeURIComponent(id)}/dot-pairing`, { pairingCode: pairingCode.trim() }),
-    onSuccess: ({ redirectUrl }) => { setPairingCode(""); window.location.assign(redirectUrl); },
+    onSuccess: ({ redirectUrl }) => { setPairingCode(""); if (!navigateIfSafe(redirectUrl)) setRedirectBlocked(true); },
   });
   if (deviceResult) return <div className="mx-auto max-w-xl py-10"><Card className="block space-y-4 p-6"><Paperclip className="size-8" /><h1 className="text-xl font-semibold">{deviceResult === "approved" ? "Access approved" : "Connection declined"}</h1><p className="text-sm">{deviceResult === "approved" ? "Return to your assistant. It will finish connecting automatically." : "No access was granted. You can start a new connection from your assistant."}</p><Button variant="outline" asChild><Link to="/">Back to Paperclip</Link></Button></Card></div>;
   const returnPath = device ? `/mcp-device?user_code=${encodeURIComponent(id)}` : `${agentPairingOnly ? "/dot-connect" : "/mcp-connect"}/${id}`;
@@ -108,6 +110,7 @@ function McpConnectRequest({ id, device = false, agentPairingOnly = false, onEdi
       {(requestView.kind === "loading" || requestView.kind === "reconnecting") && <p role="status" className="text-sm text-muted-foreground">Loading connection request…</p>}
       {requestView.kind === "error" && <QueryErrorState error={requestView.error} action="load this connection request" onRetry={requestView.retry} retrying={requestView.isFetching} />}
       {requestView.kind === "error" && <p className="text-sm text-muted-foreground">Start a new connection from your assistant.</p>}
+      {redirectBlocked && <p role="alert" className="text-sm text-destructive">The return address for this connection was blocked because it is not a safe link. Start a new connection from your assistant.</p>}
       {device && requestView.kind === "error" && <Button variant="outline" onClick={onEditCode}>Enter a different code</Button>}
       {data?.agentConnection && !device && <form className="space-y-3" onSubmit={event => { event.preventDefault(); pairDot.mutate(); }}>
         <p className="text-sm">Enter the one-use code from Paperclip’s agent setup to review this connection’s access. Keep the code out of Bot chat. Access is granted only when you approve the named agent below.</p>

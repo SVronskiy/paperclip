@@ -1,3 +1,4 @@
+import { secureRandom } from "@paperclipai/shared/secure-random";
 import type {
   AdapterEnvironmentCheck,
   AdapterEnvironmentTestContext,
@@ -93,7 +94,7 @@ export async function testEnvironment(
   const targetIsRemote = target?.kind === "remote";
   const targetIsSandbox = target?.kind === "remote" && target.transport === "sandbox";
   const cwd = resolveAdapterExecutionTargetCwd(target, asString(config.cwd, ""), process.cwd());
-  const runId = `claude-envtest-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  const runId = `claude-envtest-${Date.now()}-${secureRandom().toString(16).slice(2)}`;
 
   // Always name the target the Test probed, so a pass result never hides which
   // target it checked. A local probe reports the fixed host label.

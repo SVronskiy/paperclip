@@ -1,3 +1,4 @@
+import { secureRandom } from "@paperclipai/shared/secure-random";
 import { randomUUID } from "node:crypto";
 import { and, desc, eq, inArray, isNull, lte, ne, or, sql } from "drizzle-orm";
 import { z } from "zod";
@@ -1518,7 +1519,7 @@ export function browserUseService(
         const release = (tx: Pick<Db, "update">) => tx.update(sessions).set({
           leaseToken: null,
           leaseUntil: null,
-          nextPollAt: new Date(Date.now() + delay + Math.floor(Math.random() * 500)),
+          nextPollAt: new Date(Date.now() + delay + Math.floor(secureRandom() * 500)),
         }).where(and(eq(sessions.id, s.id), eq(sessions.leaseToken, token)));
         if (connectionId) {
           // Credential-removal sweeps can race the app worker. Wake it when

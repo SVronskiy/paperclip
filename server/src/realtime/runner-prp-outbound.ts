@@ -1,3 +1,4 @@
+import { secureRandom } from "@paperclipai/shared/secure-random";
 import WebSocket from "ws";
 import { REMOTE_RUNNER_RECONNECT_GRACE_MS } from "../services/native-runtime/native-runner-recovery-contract.js";
 import type { RunnerIngressEndpoint } from "@paperclipai/adapter-utils/runner-connectivity";
@@ -335,7 +336,7 @@ export function connectRunnerPrpIngress(input: {
   const startupDeadline =
     Date.now() + (input.startupDeadlineMs ?? DEFAULT_STARTUP_DEADLINE_MS);
   const recoveryGraceMs = input.recoveryGraceMs ?? DEFAULT_RECOVERY_GRACE_MS;
-  const random = input.random ?? Math.random;
+  const random = input.random ?? secureRandom;
   let readyResolve!: () => void;
   let readyReject!: (error: unknown) => void;
   let readySettled = false;

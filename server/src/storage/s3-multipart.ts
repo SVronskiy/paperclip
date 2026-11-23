@@ -1,3 +1,4 @@
+import { secureRandom } from "@paperclipai/shared/secure-random";
 import { AbortMultipartUploadCommand, CompleteMultipartUploadCommand, CreateMultipartUploadCommand, UploadPartCommand, type S3Client } from "@aws-sdk/client-s3";
 import { sendThroughStorageOutage } from "./storage-unavailable.js";
 import { recordStorageBackoff, recordStoragePart, recordStorageThrottle, withStorageRequestStats } from "./request-stats.js";
@@ -197,7 +198,7 @@ export async function sendFileRequestWithRetry<T>(signal: AbortSignal | undefine
         recordStorageThrottle();
         if (++throttles >= THROTTLED_PART_ATTEMPTS) throw error;
         const ceiling = Math.min(THROTTLE_BACKOFF_MAX_MS, THROTTLE_BACKOFF_BASE_MS * 2 ** (throttles - 1));
-        const wait = Math.floor(Math.random() * ceiling);
+        const wait = Math.floor(secureRandom() * ceiling);
         recordStorageBackoff(wait);
         await delay(wait, undefined, { signal });
         continue;
@@ -209,7 +210,11 @@ export async function sendFileRequestWithRetry<T>(signal: AbortSignal | undefine
   }
 }
 
-/** Base64 MD5 of an inclusive byte range, as the Content-MD5 header expects. Hashed off the server's thread. */
+/**
+ * Base64 MD5 of an inclusive byte range, as the Content-MD5 header expects. Hashed off the server's thread.
+ * MD5 is fixed by the S3 `Content-MD5` header and is used only to detect transfer corruption, never as a
+ * security boundary. Protocol exception.
+ */
 export async function fileRangeMd5(file: string, start: number, end: number, signal?: AbortSignal) {
   const digest = await digestFileOffThread({ file, start, end, algorithm: "md5" }, signal);
   return Buffer.from(digest.hex, "hex").toString("base64");
@@ -283,7 +288,7 @@ export async function putS3MultipartFile(
             if (++throttles >= THROTTLED_PART_ATTEMPTS) throw error;
             if (sentAfter === reductions) { concurrency = Math.max(1, Math.floor(concurrency / 2)); reductions++; }
             const ceiling = Math.min(THROTTLE_BACKOFF_MAX_MS, THROTTLE_BACKOFF_BASE_MS * 2 ** (throttles - 1));
-            const wait = Math.floor(Math.random() * ceiling);
+            const wait = Math.floor(secureRandom() * ceiling);
             recordStorageBackoff(wait);
             await delay(wait, undefined, { signal: controller.signal });
             continue;

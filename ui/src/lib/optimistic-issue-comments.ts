@@ -1,3 +1,4 @@
+import { secureRandom } from "@paperclipai/shared/secure-random";
 import type { Issue, IssueComment } from "@paperclipai/shared";
 
 /**
@@ -36,7 +37,7 @@ function createOptimisticCommentId() {
   if (randomUuid) {
     return `optimistic-${randomUuid}`;
   }
-  return `optimistic-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+  return `optimistic-${Date.now()}-${secureRandom().toString(36).slice(2, 10)}`;
 }
 
 export function sortIssueComments<T extends { createdAt: Date | string; id: string }>(comments: T[]) {

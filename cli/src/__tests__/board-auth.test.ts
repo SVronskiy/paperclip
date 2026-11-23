@@ -5,7 +5,9 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   getStoredBoardCredential,
   loginBoardCli,
+  normalizeUrlToOpen,
   readBoardAuthStore,
+  resolveOpenUrlCommand,
   removeStoredBoardCredential,
   setStoredBoardCredential,
 } from "../client/board-auth.js";
@@ -133,5 +135,40 @@ describe("board CLI polling backoff", () => {
     const f = harness([{ status: 503, body: { error: "Unavailable" } }]);
     try { expect(await f.outcome).toHaveProperty("error.message", "Unavailable"); expect(f.counts()).toEqual({ creates: 1, polls: 1 }); }
     finally { f.cleanup(); }
+  });
+});
+
+describe("opening the approval URL", () => {
+  it("opens URLs on Windows through rundll32, never through cmd", () => {
+    const resolved = resolveOpenUrlCommand("https://paperclip.example.test/cli-auth/abc?x=1&y=2", "win32");
+    expect(resolved).toEqual({
+      command: "rundll32",
+      args: ["url.dll,FileProtocolHandler", "https://paperclip.example.test/cli-auth/abc?x=1&y=2"],
+    });
+    expect(JSON.stringify(resolved)).not.toContain("cmd");
+  });
+
+  it("uses the platform opener on macOS and Linux", () => {
+    expect(resolveOpenUrlCommand("http://127.0.0.1:3100/cli-auth/abc", "darwin")?.command).toBe("open");
+    expect(resolveOpenUrlCommand("http://127.0.0.1:3100/cli-auth/abc", "linux")?.command).toBe("xdg-open");
+  });
+
+  it.each([
+    "https://example.test/ok&calc.exe",
+    "calc.exe",
+    "javascript:alert(1)",
+    "file:///C:/Windows/System32/calc.exe",
+    "https://example.test/a b",
+    "https://example.test/a\nb",
+    "https://user:pass@example.test/",
+    "",
+  ])("rejects %j", (url) => {
+    if (url === "https://example.test/ok&calc.exe") {
+      // An ampersand in a valid https URL is data for the browser, not shell syntax.
+      expect(normalizeUrlToOpen(url)).toBe(url);
+      return;
+    }
+    expect(normalizeUrlToOpen(url)).toBeNull();
+    expect(resolveOpenUrlCommand(url, "win32")).toBeNull();
   });
 });

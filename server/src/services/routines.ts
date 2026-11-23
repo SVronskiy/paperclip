@@ -540,6 +540,8 @@ function createRoutineEnvFingerprint(env: unknown) {
 // history or depending on a trigger that can be deleted. This is an identity,
 // never a secret or an authentication proof (RFC 9562, section 5.5).
 function routineScopedRunId(routineId: string, source: string, idempotencyKey: string) {
+  // security-baseline-allow: UUIDv5 is defined by RFC 9562 section 5.5 as a SHA-1 name-based UUID. The
+  // value is an identifier, never a secret or a proof, and existing ids must not change.
   const bytes = crypto.createHash("sha1")
     .update(Buffer.from(routineId.replaceAll("-", ""), "hex"))
     .update(JSON.stringify(["paperclip.routine-run.v1", source, idempotencyKey]))

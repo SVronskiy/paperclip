@@ -1,3 +1,4 @@
+import { randomInt } from "node:crypto";
 import path from "node:path";
 import { parseArgs } from "node:util";
 import { resolveTarget, type Target } from "./guard.ts";
@@ -94,7 +95,7 @@ export function parseSteps(raw: string, holdMs: number): Step[] {
   return values.map((concurrency, index) => ({ index, concurrency, holdMs }));
 }
 
-export function defaultLabel(now: number, random: () => number = Math.random): string {
+export function defaultLabel(now: number, random: () => number = () => randomInt(0x10000) / 0x10000): string {
   const stamp = new Date(now).toISOString().slice(0, 16).replace(/[-:T]/g, "").toLowerCase();
   return `scale-${stamp}-${Math.floor(random() * 0xffff).toString(16).padStart(4, "0")}`;
 }

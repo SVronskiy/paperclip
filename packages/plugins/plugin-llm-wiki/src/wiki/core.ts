@@ -492,7 +492,7 @@ function assertRequestedCharacterLimit(name: string, value: unknown, max: number
 }
 
 function stableSpaceId(input: { companyId: string; wikiId: string; slug: string }): string {
-  const hex = createHash("md5")
+  const hex = createHash("sha256")
     .update(`${input.companyId}:${input.wikiId}:${input.slug}`)
     .digest("hex");
   return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-4${hex.slice(13, 16)}-8${hex.slice(17, 20)}-${hex.slice(20, 32)}`;

@@ -1,3 +1,4 @@
+import { secureRandom } from "@paperclipai/shared/secure-random";
 import { useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { PROJECT_COLORS, type Project, type ProjectRepository } from "@paperclipai/shared";
@@ -27,7 +28,7 @@ export function NewProjectDialog() {
 export function NewProjectForm({ companyId, onClose, onCreated }: { companyId: string; onClose: () => void; onCreated?: (project: Project) => Promise<unknown> | void }) {
   const client = useQueryClient();
   const [name, setName] = useState("");
-  const [color] = useState(() => PROJECT_COLORS[Math.floor(Math.random() * PROJECT_COLORS.length)]!);
+  const [color] = useState(() => PROJECT_COLORS[Math.floor(secureRandom() * PROJECT_COLORS.length)]!);
   const [repos, setRepos] = useState<ProjectRepository[]>([]);
   const [connecting, setConnecting] = useState(false);
   const input = useRef<HTMLInputElement>(null);

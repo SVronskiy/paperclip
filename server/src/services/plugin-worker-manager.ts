@@ -1,3 +1,4 @@
+import { secureRandom } from "@paperclipai/shared/secure-random";
 import { isPluginWorkspaceReplay } from "./plugin-workspace-replay-context.js";
 import { withPluginInteractionOrigin } from "./plugin-interaction-context.js";
 import { pluginIdleManifestGeneration, type IdlePluginCatalogEntry } from "./plugin-idle-catalog.js";
@@ -3337,7 +3338,7 @@ export function createPluginWorkerHandle(
     const delay =
       minBackoffMs * Math.pow(BACKOFF_MULTIPLIER, Math.max(attempt, 1) - 1);
     // Add jitter: ±25%
-    const jitter = delay * 0.25 * (Math.random() * 2 - 1);
+    const jitter = delay * 0.25 * (secureRandom() * 2 - 1);
     return Math.min(Math.round(delay + jitter), MAX_BACKOFF_MS);
   }
 

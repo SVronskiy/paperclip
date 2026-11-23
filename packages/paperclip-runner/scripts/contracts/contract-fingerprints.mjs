@@ -140,7 +140,7 @@ const probeCache = new Map();
 function probe(spec, readFile) {
   const source = readFile(spec.path);
   if (source === null) return { absent: true };
-  const key = `${JSON.stringify(spec, (k, v) => v instanceof RegExp ? String(v) : v)}\0${createHash("sha1").update(source).digest("hex")}`;
+  const key = `${JSON.stringify(spec, (k, v) => v instanceof RegExp ? String(v) : v)}\0${createHash("sha256").update(source).digest("hex")}`;
   if (!probeCache.has(key)) probeCache.set(key, probeUncached(spec, source));
   return probeCache.get(key);
 }

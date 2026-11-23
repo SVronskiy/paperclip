@@ -13,6 +13,17 @@ import { createS3StorageProvider } from "../storage/s3-provider.js";
 import { createStorageService } from "../storage/service.js";
 import * as fileCrypto from "../storage/file-crypto-pool.js";
 
+
+/** Makes `secureRandom()` return `value` by controlling the words read from `crypto.getRandomValues`. */
+function mockSecureRandom(value: number) {
+  const scaled = Math.round(value * 2 ** 53);
+  return vi.spyOn(globalThis.crypto, "getRandomValues").mockImplementation(((target: Uint32Array) => {
+    target[0] = Math.floor(scaled / 2 ** 26) * 32;
+    target[1] = (scaled % 2 ** 26) * 64;
+    return target;
+  }) as typeof crypto.getRandomValues);
+}
+
 const partBytes = 8 * 1024 * 1024;
 
 async function sourceFile(parts: number) {
@@ -67,7 +78,7 @@ describe("file-backed S3 multipart uploads under a request-rate limit", () => {
     });
     await new Promise<void>((resolve, reject) => { server.once("error", reject); server.listen(0, "127.0.0.1", resolve); });
     vi.stubEnv("AWS_ACCESS_KEY_ID", "fixture"); vi.stubEnv("AWS_SECRET_ACCESS_KEY", "fixture");
-    const random = vi.spyOn(Math, "random").mockReturnValue(0);
+    const random = mockSecureRandom(0);
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     const service = createStorageService(createS3StorageProvider({ bucket: "bucket", region: "us-east-1", forcePathStyle: true,
       endpoint: `http://127.0.0.1:${(server.address() as AddressInfo).port}` }));
@@ -95,7 +106,7 @@ describe("file-backed S3 multipart uploads under a request-rate limit", () => {
     const firstRoundRetried = Promise.withResolvers<void>();
     // Keep disk I/O out of the concurrency measurement. The real-client test checks MD5.
     using digest = vi.spyOn(fileCrypto, "digestFileOffThread").mockResolvedValue({ hex: "0".repeat(32), bytes: partBytes });
-    const random = vi.spyOn(Math, "random").mockReturnValue(0);
+    const random = mockSecureRandom(0);
     const send = vi.spyOn(client, "send").mockImplementation(async (command: any) => {
       if (command instanceof CreateMultipartUploadCommand) return { UploadId: "upload" };
       if (command instanceof UploadPartCommand) {
@@ -128,7 +139,7 @@ describe("file-backed S3 multipart uploads under a request-rate limit", () => {
   it("stops after a bounded number of throttled attempts and aborts once", async () => {
     const source = await sourceFile(3);
     const client = new S3Client({ region: "us-east-1" });
-    const random = vi.spyOn(Math, "random").mockReturnValue(0);
+    const random = mockSecureRandom(0);
     const send = vi.spyOn(client, "send").mockImplementation(async (command: any) => {
       if (command instanceof CreateMultipartUploadCommand) return { UploadId: "upload" };
       if (command instanceof UploadPartCommand) {
@@ -152,7 +163,7 @@ describe("file-backed S3 multipart uploads under a request-rate limit", () => {
     const source = await sourceFile(3);
     const client = new S3Client({ region: "us-east-1" });
     const cancellation = new AbortController();
-    const random = vi.spyOn(Math, "random").mockReturnValue(0.99);
+    const random = mockSecureRandom(0.99);
     const send = vi.spyOn(client, "send").mockImplementation(async (command: any) => {
       if (command instanceof CreateMultipartUploadCommand) return { UploadId: "upload" };
       if (command instanceof UploadPartCommand) {

@@ -8,6 +8,17 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { AdvancedRule, WizardSelections } from "./profile-model";
 import { WizardToolsStep } from "./WizardToolsStep";
 
+
+/** A `crypto.getRandomValues` stand-in that makes `secureRandom()` return `value`. */
+function fakeRandomValues(value: number) {
+  const scaled = Math.round(value * 2 ** 53);
+  return (target: Uint32Array) => {
+    target[0] = Math.floor(scaled / 2 ** 26) * 32;
+    target[1] = (scaled % 2 ** 26) * 64;
+    return target;
+  };
+}
+
 (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 function tool(id: string, toolName: string): ToolCatalogEntry {
@@ -86,9 +97,8 @@ describe("WizardToolsStep", () => {
   }
 
   it("adds an advanced rule when crypto.randomUUID is unavailable", () => {
-    vi.stubGlobal("crypto", {});
+    vi.stubGlobal("crypto", { getRandomValues: fakeRandomValues(0.123456789) });
     vi.spyOn(Date, "now").mockReturnValue(1_780_000_000_000);
-    vi.spyOn(Math, "random").mockReturnValue(0.123456789);
     render();
 
     const advancedTrigger = [...container.querySelectorAll("button")].find(

@@ -1,3 +1,4 @@
+import { safeRedirect } from "./safe-redirect.js";
 import { slackCapabilities } from "../services/connectors/slack-capabilities.js";
 import { slackSearchOAuthService } from "../services/connectors/slack-search-oauth.js";
 import { accessService } from "../services/access.js";
@@ -56,7 +57,9 @@ export function slackToolRoutes(db: Db, publicBaseUrl?: string) {
       .select({ prefix: companies.issuePrefix })
       .from(companies)
       .where(eq(companies.id, result.companyId));
-    res.redirect(
+    safeRedirect(
+      res,
+      302,
       `/${encodeURIComponent(company.prefix)}/apps/chat/${result.endpointId}/access`,
     );
   });

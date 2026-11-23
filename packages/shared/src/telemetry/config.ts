@@ -59,25 +59,44 @@ export function resolveCaps(overrides?: TelemetryConfigOverrides): ResolvedTelem
   };
 }
 
-function isCI(): boolean {
-  return CI_ENV_VARS.some((key) => process.env[key] === "true" || process.env[key] === "1");
+/** Accepts the usual spellings of an enabled flag: 1, true, yes, on (case-insensitive). */
+function isTruthyFlag(value: string | undefined): boolean {
+  const normalized = value?.trim().toLowerCase();
+  return normalized === "1" || normalized === "true" || normalized === "yes" || normalized === "on";
 }
 
+function isCI(): boolean {
+  return CI_ENV_VARS.some((key) => isTruthyFlag(process.env[key]));
+}
+
+/**
+ * Telemetry is opt-in. It stays off unless the operator turns it on with
+ * `PAPERCLIP_TELEMETRY_ENABLED` or `telemetry.enabled: true` in the config
+ * file, and any opt-out signal (`PAPERCLIP_TELEMETRY_DISABLED`, `DO_NOT_TRACK`,
+ * CI, `telemetry.enabled: false`) wins over an opt-in. There is no built-in
+ * collector address: events are sent only to `PAPERCLIP_TELEMETRY_ENDPOINT`
+ * (or to a custom transport) and are dropped when neither is configured.
+ */
 export function resolveTelemetryConfig(
   fileConfig?: { enabled?: boolean } & TelemetryConfigOverrides,
 ): TelemetryConfig {
   const caps = resolveCaps(fileConfig);
 
-  if (process.env.PAPERCLIP_TELEMETRY_DISABLED === "1") {
+  if (isTruthyFlag(process.env.PAPERCLIP_TELEMETRY_DISABLED)) {
     return { enabled: false, ...caps };
   }
-  if (process.env.DO_NOT_TRACK === "1") {
+  if (isTruthyFlag(process.env.DO_NOT_TRACK)) {
     return { enabled: false, ...caps };
   }
   if (isCI()) {
     return { enabled: false, ...caps };
   }
   if (fileConfig?.enabled === false) {
+    return { enabled: false, ...caps };
+  }
+
+  const optedIn = isTruthyFlag(process.env.PAPERCLIP_TELEMETRY_ENABLED) || fileConfig?.enabled === true;
+  if (!optedIn) {
     return { enabled: false, ...caps };
   }
 

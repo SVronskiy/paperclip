@@ -1,3 +1,4 @@
+import { secureRandom } from "@paperclipai/shared/secure-random";
 import { createHash } from "node:crypto";
 import path from "node:path";
 import {
@@ -80,7 +81,7 @@ export function initTelemetry(
       config,
       getState,
       serverVersion,
-      Math.random,
+      secureRandom,
       transport ?? undefined,
     );
     trackServerStarted(pendingClient, { os_platform: process.platform });

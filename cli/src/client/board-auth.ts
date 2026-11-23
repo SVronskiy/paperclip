@@ -181,13 +181,47 @@ async function requestJson<T>(url: string, init?: RequestInit): Promise<T> {
   return response.json() as Promise<T>;
 }
 
+/**
+ * Validates a URL before it is handed to the operating system and returns the
+ * normalized form. Only http(s) URLs without control characters or embedded
+ * credentials are opened; anything else (file:, javascript:, a bare command
+ * string) is rejected so the OS never interprets it as something to execute.
+ */
+export function normalizeUrlToOpen(url: string): string | null {
+  // eslint-disable-next-line no-control-regex
+  if (typeof url !== "string" || /[\u0000-\u001f\u007f\s]/.test(url)) return null;
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return null;
+  }
+  if (parsed.protocol !== "https:" && parsed.protocol !== "http:") return null;
+  if (parsed.username || parsed.password) return null;
+  return parsed.href;
+}
+
+/**
+ * The command that opens a URL in the default browser. Windows uses
+ * `rundll32 url.dll,FileProtocolHandler`, which takes the URL as one argument
+ * and never goes through `cmd`, so `&`, `|` and `^` in the URL are not
+ * interpreted as shell syntax.
+ */
+export function resolveOpenUrlCommand(
+  url: string,
+  platform: NodeJS.Platform = process.platform,
+): { command: string; args: string[] } | null {
+  const safeUrl = normalizeUrlToOpen(url);
+  if (!safeUrl) return null;
+  if (platform === "darwin") return { command: "open", args: [safeUrl] };
+  if (platform === "win32") return { command: "rundll32", args: ["url.dll,FileProtocolHandler", safeUrl] };
+  return { command: "xdg-open", args: [safeUrl] };
+}
+
 export async function openUrl(url: string): Promise<boolean> {
-  const { command, args } =
-    process.platform === "darwin"
-      ? { command: "open", args: [url] }
-      : process.platform === "win32"
-        ? { command: "cmd", args: ["/c", "start", "", url] }
-        : { command: "xdg-open", args: [url] };
+  const resolved = resolveOpenUrlCommand(url);
+  if (!resolved) return false;
+  const { command, args } = resolved;
 
   return new Promise<boolean>((resolve) => {
     let child: ChildProcess;

@@ -1,14 +1,15 @@
 #!/usr/bin/env node
-import { spawnSync } from "node:child_process";
+import { spawnPnpmSync } from "./lib/pnpm-invocation.mjs";
 
 const args = process.argv.slice(2).filter((arg) => arg !== "--");
 const includeGated = args.includes("--include-gated");
 const passthrough = args.filter((arg) => arg !== "--include-gated");
 
 const grep = includeGated ? "@mcp-us" : "@mcp-runnable";
-const result = spawnSync(
-  "npx",
+// `pnpm exec` instead of `npx`: npx is npx.cmd on Windows, which needs a shell.
+const result = spawnPnpmSync(
   [
+    "exec",
     "playwright",
     "test",
     "--config",
@@ -18,7 +19,7 @@ const result = spawnSync(
     grep,
     ...passthrough,
   ],
-  { stdio: "inherit", shell: process.platform === "win32" },
+  { stdio: "inherit" },
 );
 
 if (result.error) console.error(result.error);

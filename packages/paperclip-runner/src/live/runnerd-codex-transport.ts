@@ -30,7 +30,7 @@ import { isCanonicalProviderEventType } from "../provider-events.js";
 import { execFileSync } from "node:child_process";
 import { readLinuxProcessStartedAt } from "./linux-process-start.js";
 import { reapExitedRunnerLineage } from "./runner-lineage-reap.js";
-import { createHash, randomUUID } from "node:crypto";
+import { createHash, randomUUID, randomInt } from "node:crypto";
 import {
   appendFileSync,
   existsSync,
@@ -9322,7 +9322,7 @@ class DurablePrpCodexTransport implements CodexAppServerTransport {
           const base = delays[Math.min(attempt - 1, delays.length - 1)]!;
           const jittered = Math.max(
             1,
-            Math.round(base * (0.75 + Math.random() * 0.5)),
+            Math.round(base * (0.75 + randomInt(1_000_000) / 2_000_000)),
           );
           await new Promise((resolveWait) => setTimeout(resolveWait, jittered));
         }

@@ -118,6 +118,27 @@ describe("registered connector events against the real TelemetryClient", () => {
     expect(fetch).not.toHaveBeenCalled();
   });
 
+  it("is opt-in: off unless PAPERCLIP_TELEMETRY_ENABLED or telemetry.enabled: true is set", () => {
+    for (const key of ["PAPERCLIP_TELEMETRY_ENABLED", "PAPERCLIP_TELEMETRY_DISABLED", "DO_NOT_TRACK", "CI", "CONTINUOUS_INTEGRATION", "BUILD_NUMBER", "GITHUB_ACTIONS", "GITLAB_CI"]) {
+      vi.stubEnv(key, "");
+    }
+    expect(resolveTelemetryConfig().enabled).toBe(false);
+    expect(resolveTelemetryConfig({}).enabled).toBe(false);
+    expect(resolveTelemetryConfig({ enabled: true }).enabled).toBe(true);
+    vi.stubEnv("PAPERCLIP_TELEMETRY_ENABLED", "yes");
+    expect(resolveTelemetryConfig().enabled).toBe(true);
+  });
+
+  it.each(["1", "true", "TRUE", "yes", "on"])("opt-out flag value %s disables telemetry even when opted in", (value) => {
+    vi.stubEnv("PAPERCLIP_TELEMETRY_ENABLED", "1");
+    vi.stubEnv("DO_NOT_TRACK", value);
+    expect(resolveTelemetryConfig({ enabled: true }).enabled).toBe(false);
+    vi.unstubAllEnvs();
+    vi.stubEnv("PAPERCLIP_TELEMETRY_ENABLED", "1");
+    vi.stubEnv("PAPERCLIP_TELEMETRY_DISABLED", value);
+    expect(resolveTelemetryConfig({ enabled: true }).enabled).toBe(false);
+  });
+
   it("environment suppression resolves telemetry off under CI and opt-out flags", () => {
     vi.stubEnv("PAPERCLIP_TELEMETRY_DISABLED", "1");
     expect(resolveTelemetryConfig().enabled).toBe(false);

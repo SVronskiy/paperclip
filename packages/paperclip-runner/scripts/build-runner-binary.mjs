@@ -38,7 +38,7 @@ export async function main({ env = process.env, packageRoot, log = console.log }
     return { reused: true, ...staged };
   }
   const { command, args } = pnpmInvocation(env);
-  const result = spawnSync(command, [...args, "run", "build:binary"], { cwd: root, env, stdio: "inherit", shell: process.platform === "win32" && command === "pnpm" });
+  const result = spawnSync(command, [...args, "run", "build:binary"], { cwd: root, env, stdio: "inherit", shell: false });
   if (result.error) throw result.error;
   if (result.status !== 0) throw new Error(`build:binary exited with ${result.status ?? result.signal}`);
   return { reused: false };

@@ -1,3 +1,4 @@
+import { secureRandom } from "../secure-random.js";
 import { createHash } from "node:crypto";
 import type {
   TelemetryConfig,
@@ -11,10 +12,6 @@ import type {
 import { type ResolvedTelemetryCaps, resolveCaps } from "./config.js";
 import { PAPERCLIP_EVENTS } from "./generated/paperclip-telemetry.js";
 
-const DEFAULT_ENDPOINTS = [
-  "https://telemetry.paperclip.ing/ingest",
-  "https://rusqrrg391.execute-api.us-east-1.amazonaws.com/ingest",
-] as const;
 // Queue-pressure valve: auto-flush once this many events are buffered. This is
 // an in-memory backpressure trigger, independent of the wire caps that
 // `chunkForSend` enforces on each POST.
@@ -141,9 +138,9 @@ export class TelemetryClient {
     config: TelemetryConfig,
     stateFactory: () => TelemetryState,
     version: string,
-    // Injectable RNG for backoff jitter — defaults to `Math.random`; tests pass
+    // Injectable RNG for backoff jitter — defaults to `secureRandom`; tests pass
     // a seeded function for deterministic backoff. Callers keep the 3-arg form.
-    random: () => number = Math.random,
+    random: () => number = secureRandom,
     // Optional custom delivery. Omitted on self-hosted installs, which keep the
     // default collector path unchanged.
     transport?: TelemetryTransport,
@@ -476,6 +473,9 @@ export class TelemetryClient {
    */
   private async postEnvelope(body: string): Promise<TelemetrySendResult> {
     const endpoints = this.resolveEndpoints();
+    // No collector configured: there is nowhere to send, so drop the batch
+    // instead of queueing it for retry.
+    if (endpoints.length === 0) return { kind: "ok" };
     let lastTransient: { kind: "status"; status: number; retryAfterMs?: number } | undefined;
     for (const endpoint of endpoints) {
       const controller = new AbortController();
@@ -562,6 +562,6 @@ export class TelemetryClient {
 
   private resolveEndpoints(): readonly string[] {
     const configured = this.config.endpoint?.trim();
-    return configured ? [configured] : DEFAULT_ENDPOINTS;
+    return configured ? [configured] : [];
   }
 }

@@ -1,3 +1,4 @@
+import { secureRandom } from "@paperclipai/shared/secure-random";
 import { and, eq, inArray, sql } from "drizzle-orm";
 import { type EnvironmentRetryScope, isRetryableEnvironmentErrorCode, isRetryableEnvironmentHttpStatus, JsonRpcCallError, PLUGIN_RPC_ERROR_CODES, readEnvironmentResumeErrorDiagnostic } from "@paperclipai/plugin-sdk";
 import type { Db } from "@paperclipai/db";
@@ -52,7 +53,7 @@ export const RESUME_RETRY_MAX_DELAY_MS = 5_000;
 
 /** The jittered wait before the next resume attempt, from the current base delay. */
 export function jitteredResumeRetryDelayMs(baseDelayMs: number): number {
-  return Math.max(1, Math.round(baseDelayMs * (0.75 + Math.random() * 0.5)));
+  return Math.max(1, Math.round(baseDelayMs * (0.75 + secureRandom() * 0.5)));
 }
 
 export function nextResumeRetryBaseDelayMs(baseDelayMs: number): number {

@@ -1,3 +1,4 @@
+import { secureRandom } from "@paperclipai/shared/secure-random";
 import { useCallback, useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Flag, Loader2, Pause, Play, Pencil, Trash2 } from "lucide-react";
@@ -28,7 +29,7 @@ const PENDING_LABELS: Record<string, string> = {
 function requestId() {
   return typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
     ? crypto.randomUUID()
-    : `goal_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+    : `goal_${Date.now()}_${secureRandom().toString(36).slice(2)}`;
 }
 
 function formatDuration(seconds: number) {

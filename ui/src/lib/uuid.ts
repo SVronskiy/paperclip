@@ -3,9 +3,12 @@ export function createUuid(): string {
   const webCrypto = globalThis.crypto;
   if (typeof webCrypto?.randomUUID === "function") return webCrypto.randomUUID();
 
+  // No insecure fallback: getRandomValues exists in every browser, including on plain HTTP.
+  if (typeof webCrypto?.getRandomValues !== "function") {
+    throw new Error("A secure random number generator (crypto.getRandomValues) is not available");
+  }
   const bytes = new Uint8Array(16);
-  if (typeof webCrypto?.getRandomValues === "function") webCrypto.getRandomValues(bytes);
-  else for (let index = 0; index < bytes.length; index++) bytes[index] = Math.floor(Math.random() * 256);
+  webCrypto.getRandomValues(bytes);
   bytes[6] = (bytes[6] & 0x0f) | 0x40;
   bytes[8] = (bytes[8] & 0x3f) | 0x80;
   const hex = Array.from(bytes, byte => byte.toString(16).padStart(2, "0"));

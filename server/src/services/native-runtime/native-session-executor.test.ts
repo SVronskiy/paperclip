@@ -528,6 +528,17 @@ import {
 } from "./native-session-executor.js";
 import { onNativeRunnerEvidence } from "./native-runner-evidence-signal.js";
 
+
+/** Makes `secureRandom()` return `value` by controlling the words read from `crypto.getRandomValues`. */
+function mockSecureRandom(value: number) {
+  const scaled = Math.round(value * 2 ** 53);
+  return vi.spyOn(globalThis.crypto, "getRandomValues").mockImplementation(((target: Uint32Array) => {
+    target[0] = Math.floor(scaled / 2 ** 26) * 32;
+    target[1] = (scaled % 2 ** 26) * 64;
+    return target;
+  }) as typeof crypto.getRandomValues);
+}
+
 beforeEach(() => {
   state.localRuntimeApiUrl.mockReset().mockReturnValue("http://127.0.0.1:43219");
   // These transport-wiring fixtures use a partial Db double and synthetic IDs.
@@ -11914,7 +11925,7 @@ describe("native warm session supervision", () => {
         turnId: identity, normalizedSessionId: identity, providerSessionId: identity,
         driverKind: "test", driverVersion: "1", nativeEventCount: 1, highestContiguousSourceSeq: 1, usage: null };
     });
-    const random = vi.spyOn(Math, "random").mockReturnValue(0);
+    const random = mockSecureRandom(0);
     let busyCollections = 0;
     const collectStopped = vi.fn(async () => {
       if (busyCollections++ === 0) throw new AgentDirectoryOperationBusyError();

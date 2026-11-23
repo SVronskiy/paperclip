@@ -1,3 +1,4 @@
+import { secureRandom } from "@paperclipai/shared/secure-random";
 import type { AgentAppearance } from "@paperclipai/shared";
 import {
   createContext,
@@ -82,7 +83,7 @@ function normalizeTtl(value: number | undefined, tone: ToastTone) {
 }
 
 function generateToastId() {
-  return `toast_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+  return `toast_${Date.now()}_${secureRandom().toString(36).slice(2, 8)}`;
 }
 
 export function ToastProvider({ children }: { children: ReactNode }) {

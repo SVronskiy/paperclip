@@ -1,4 +1,4 @@
-import { createHash } from "node:crypto";
+import { createHash, randomBytes } from "node:crypto";
 import os from "node:os";
 import type { AdapterModel } from "@paperclipai/adapter-utils";
 import {
@@ -173,7 +173,7 @@ export async function discoverOpenCodeModels(
 
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     const result = await runChildProcess(
-      `opencode-models-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+      `opencode-models-${Date.now()}-${randomBytes(8).toString("hex")}`,
       command,
       ["models", ...(input.refresh ? ["--refresh"] : [])],
       {

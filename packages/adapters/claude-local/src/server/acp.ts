@@ -1,3 +1,4 @@
+import { secureRandom } from "@paperclipai/shared/secure-random";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -776,7 +777,7 @@ export async function probeClaudeAcpSandboxLogin(input: {
     }),
   );
   const timeoutSec = Math.max(1, asNumber(config.helloProbeTimeoutSec, targetIsSandbox ? 90 : 45));
-  const runId = `claude-acp-authprobe-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  const runId = `claude-acp-authprobe-${Date.now()}-${secureRandom().toString(16).slice(2)}`;
   let probe: Awaited<ReturnType<typeof runAdapterExecutionTargetProcess>>;
   try {
     probe = await runAdapterExecutionTargetProcess(runId, target, command, args, {
@@ -1008,7 +1009,7 @@ export async function testClaudeAcpEnvironment(
     if (isNonEmpty(hostConfigDir) && !isNonEmpty(probeEnv.CLAUDE_CONFIG_DIR)) {
       probeEnv.CLAUDE_CONFIG_DIR = hostConfigDir.trim();
     }
-    const runId = `claude-acp-envtest-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    const runId = `claude-acp-envtest-${Date.now()}-${secureRandom().toString(16).slice(2)}`;
     let cleanupManagedProbe: (() => Promise<void>) | undefined;
     try {
       checks.push(

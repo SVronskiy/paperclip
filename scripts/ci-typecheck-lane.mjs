@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { spawn, spawnSync } from "node:child_process";
+import { resolvePnpmInvocation } from "./lib/pnpm-invocation.mjs";
 import { availableParallelism, setPriority } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -80,11 +81,14 @@ export function planLane({ buildGapPackages, testLayers, projects = PROJECTS }) 
 const seconds = (ms) => `${(ms / 1000).toFixed(1)}s`;
 
 function spawnTask(task, { cwd, env, stdio }) {
-  return spawn(task.command, task.args, {
+  // No shell: pnpm is resolved by resolvePnpmInvocation, other commands are spawned directly.
+  const taskEnv = { ...env, ...task.env };
+  const pnpm = task.command === "pnpm" ? resolvePnpmInvocation(taskEnv) : null;
+  return spawn(pnpm ? pnpm.command : task.command, pnpm ? [...pnpm.argsPrefix, ...task.args] : task.args, {
     cwd,
-    env: { ...env, ...task.env },
+    env: taskEnv,
     stdio,
-    shell: process.platform === "win32",
+    shell: false,
   });
 }
 

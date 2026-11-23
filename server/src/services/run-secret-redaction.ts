@@ -27,7 +27,7 @@ const OUTPUT_SECRET_KEY = "paperclipOutputSecretRedactions";
 const registrySnapshot = sql`jsonb_build_object('paperclipSecretRedactions', ${heartbeatRuns.contextSnapshot} -> 'paperclipSecretRedactions')`;
 
 export function runSecretRedactionVersionSql() {
-  return sql<string>`md5(coalesce((${heartbeatRuns.contextSnapshot}->${REGISTRY_KEY})::text, ''))`;
+  return sql<string>`encode(sha256(convert_to(coalesce((${heartbeatRuns.contextSnapshot}->${REGISTRY_KEY})::text, ''), 'UTF8')), 'hex')`;
 }
 
 type RegistryEntry = {

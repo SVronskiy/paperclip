@@ -1,3 +1,4 @@
+import { secureRandom } from "@paperclipai/shared/secure-random";
 import { HttpError } from "../../../errors.js";
 
 export const GITHUB_PUBLICATION_MAX_ATTEMPTS = 8;
@@ -6,7 +7,7 @@ export const GITHUB_INLINE_MAX_ATTEMPTS = 3;
 
 export function githubRetryDelay(attempt: number) {
   return (
-    Math.min(300_000, 1000 * 2 ** attempt) + Math.floor(Math.random() * 250)
+    Math.min(300_000, 1000 * 2 ** attempt) + Math.floor(secureRandom() * 250)
   );
 }
 

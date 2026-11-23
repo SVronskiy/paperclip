@@ -399,9 +399,9 @@ Find Plugins and more at [awesome-paperclip](https://github.com/gsxdsm/awesome-p
 
 ## Telemetry
 
-Paperclip collects anonymous usage telemetry to help us understand how the product is used and improve it. No personal information, issue content, prompts, file paths, or secrets are ever collected. Private repository references are hashed with a per-install salt before being sent.
+Paperclip can collect anonymous usage telemetry to help understand how the product is used. Telemetry is opt-in: it is off unless you set `PAPERCLIP_TELEMETRY_ENABLED=1` (or `telemetry.enabled: true`) and point `PAPERCLIP_TELEMETRY_ENDPOINT` at your own collector; there is no built-in collector address. No personal information, issue content, prompts, file paths, or secrets are ever collected. Private repository references are hashed with a per-install salt before being sent.
 
-Telemetry is **enabled by default** and can be disabled with any of the following:
+Telemetry is **off by default**. Even when opted in, any of the following turns it off (values `1`, `true`, `yes`, `on`):
 
 | Method               | How                                                     |
 | -------------------- | ------------------------------------------------------- |

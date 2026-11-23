@@ -14,6 +14,17 @@ import { nativeHarnessBackupOwner, persistNativeHarnessBackup, restoreDurableNat
 import { removeNativeHarnessBackup } from "./native-harness-backup-cleanup.js";
 import { canonicalProviderPackJson } from "./remote-provider-pack-verification.js";
 
+
+/** Makes `secureRandom()` return `value` by controlling the words read from `crypto.getRandomValues`. */
+function mockSecureRandom(value: number) {
+  const scaled = Math.round(value * 2 ** 53);
+  return vi.spyOn(globalThis.crypto, "getRandomValues").mockImplementation(((target: Uint32Array) => {
+    target[0] = Math.floor(scaled / 2 ** 26) * 32;
+    target[1] = (scaled % 2 ** 26) * 64;
+    return target;
+  }) as typeof crypto.getRandomValues);
+}
+
 // Durable harness backups against an S3 endpoint that throttles requests.
 describeEmbeddedPostgres("durable native provider backups under an object-storage request-rate limit", () => {
   const environment = nativeRestartFixture();
@@ -114,7 +125,7 @@ describeEmbeddedPostgres("durable native provider backups under an object-storag
     });
     await new Promise<void>((resolve, reject) => { server.once("error", reject); server.listen(0, "127.0.0.1", resolve); });
     vi.stubEnv("AWS_ACCESS_KEY_ID", "fixture"); vi.stubEnv("AWS_SECRET_ACCESS_KEY", "fixture");
-    const random = vi.spyOn(Math, "random").mockReturnValue(0);
+    const random = mockSecureRandom(0);
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     const storage = createStorageService(createS3StorageProvider({ bucket: "bucket", region: "us-east-1", forcePathStyle: true,
       endpoint: `http://127.0.0.1:${(server.address() as AddressInfo).port}` }));
@@ -173,7 +184,7 @@ describeEmbeddedPostgres("durable native provider backups under an object-storag
     });
     await new Promise<void>((resolve, reject) => { server.once("error", reject); server.listen(0, "127.0.0.1", resolve); });
     vi.stubEnv("AWS_ACCESS_KEY_ID", "fixture"); vi.stubEnv("AWS_SECRET_ACCESS_KEY", "fixture");
-    const random = vi.spyOn(Math, "random").mockReturnValue(0);
+    const random = mockSecureRandom(0);
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     const storage = createStorageService(createS3StorageProvider({ bucket: "bucket", region: "us-east-1", forcePathStyle: true,
       endpoint: `http://127.0.0.1:${(server.address() as AddressInfo).port}` }));

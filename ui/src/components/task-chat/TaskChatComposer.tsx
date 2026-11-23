@@ -1,3 +1,4 @@
+import { secureRandom } from "@paperclipai/shared/secure-random";
 import { createUuid } from "@/lib/uuid";
 import { useCurrentAccountGuard } from "@/hooks/useAccountBoundMutation";
 import { ComposerFileDropTarget } from "./ComposerFileDropTarget";
@@ -774,7 +775,7 @@ export function TaskChatComposer({
 
   /** Non-image files: attach to the task and track in the chip row. */
   async function attachNonImageFile(file: File) {
-    const id = `${file.name}:${file.size}:${file.lastModified}:${Math.random().toString(36).slice(2)}`;
+    const id = `${file.name}:${file.size}:${file.lastModified}:${secureRandom().toString(36).slice(2)}`;
     setAttachments((prev) => [
       ...prev,
       { id, name: file.name, size: file.size, contentType: file.type, status: "uploading" },

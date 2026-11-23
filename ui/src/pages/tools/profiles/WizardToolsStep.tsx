@@ -1,3 +1,4 @@
+import { secureRandom } from "@paperclipai/shared/secure-random";
 import { useMemo, useState } from "react";
 import { ChevronDown, ChevronRight, Plug, Plus, Search, X } from "lucide-react";
 import { Link } from "@/lib/router";
@@ -310,7 +311,7 @@ const RULE_KIND_OPTIONS: Array<{ value: AdvancedRuleKind; label: string }> = [
 function createAdvancedRuleId() {
   const randomUuid = globalThis.crypto?.randomUUID?.();
   if (randomUuid) return randomUuid;
-  return `rule-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+  return `rule-${Date.now().toString(36)}-${secureRandom().toString(36).slice(2, 10)}`;
 }
 
 function ruleSummary(rule: AdvancedRule): string {

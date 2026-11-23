@@ -1,3 +1,4 @@
+import { secureRandom } from "@paperclipai/shared/secure-random";
 import { useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 
@@ -60,7 +61,7 @@ type ZFlight = {
 };
 
 function randomBetween(min: number, max: number) {
-  return min + Math.random() * (max - min);
+  return min + secureRandom() * (max - min);
 }
 
 /**

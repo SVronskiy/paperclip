@@ -5,7 +5,7 @@
 //
 // Usage: node scripts/typecheck-low-memory.mjs
 
-import { spawnSync } from "node:child_process";
+import { spawnPnpmSync } from "./lib/pnpm-invocation.mjs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { LOW_MEMORY_VARIABLE } from "./run-tsc.mjs";
@@ -16,11 +16,9 @@ export const STEPS = [
 ];
 
 export function runPnpm(args, options) {
-  const result = spawnSync("pnpm", args, {
+  const result = spawnPnpmSync(args, {
     ...options,
     stdio: "inherit",
-    // A bare `pnpm` on Windows is pnpm.cmd, which needs the shell to resolve.
-    shell: process.platform === "win32",
   });
   if (result.error) throw result.error;
   return result.status ?? 1;

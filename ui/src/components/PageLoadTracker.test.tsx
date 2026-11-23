@@ -10,6 +10,17 @@ import type { PageLoadMeasurement, PageLoadRecorder } from "@/lib/browser-tracin
 import { resetPageSessionSampleForTest } from "@/lib/browser-tracing/controller";
 import { PageLoadTracker } from "./PageLoadTracker";
 
+
+/** Makes `secureRandom()` return `value` by controlling the words read from `crypto.getRandomValues`. */
+function mockSecureRandom(value: number) {
+  const scaled = Math.round(value * 2 ** 53);
+  return vi.spyOn(globalThis.crypto, "getRandomValues").mockImplementation(((target: Uint32Array) => {
+    target[0] = Math.floor(scaled / 2 ** 26) * 32;
+    target[1] = (scaled % 2 ** 26) * 64;
+    return target;
+  }) as typeof crypto.getRandomValues);
+}
+
 const getSessionMock = vi.hoisted(() => vi.fn());
 const sdkModuleImported = vi.hoisted(() => vi.fn());
 const measurements = vi.hoisted(() => ({ begun: [] as PageLoadMeasurement[], ended: [] as PageLoadMeasurement[] }));
@@ -162,7 +173,7 @@ describe("PageLoadTracker", () => {
   });
 
   it("downloads nothing for an unsampled page session", async () => {
-    vi.spyOn(Math, "random").mockReturnValue(0.9);
+    mockSecureRandom(0.9);
     getSessionMock.mockResolvedValue(session({ ...config, sampleRate: 0.5 }));
     await render("/PAP/issues");
     await settle();

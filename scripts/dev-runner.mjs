@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { spawn } from "node:child_process";
+import { spawnPnpm } from "./lib/pnpm-invocation.mjs";
 import { randomUUID } from "node:crypto";
 import { existsSync, mkdirSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
 import path from "node:path";
@@ -104,7 +104,6 @@ if (tailscaleAuth) {
   console.log("[paperclip] dev mode: local_trusted (default)");
 }
 
-const pnpmBin = process.platform === "win32" ? "pnpm.cmd" : "pnpm";
 let previousSnapshot = collectWatchedSnapshot();
 let dirtyPaths = new Set();
 let pendingMigrations = [];
@@ -254,11 +253,10 @@ function clearDevServerStatus() {
 
 async function runPnpm(args, options = {}) {
   return await new Promise((resolve, reject) => {
-    const spawned = spawn(pnpmBin, args, {
+    const spawned = spawnPnpm(args, {
       stdio: options.stdio ?? ["ignore", "pipe", "pipe"],
       env: options.env ?? process.env,
       cwd: options.cwd,
-      shell: process.platform === "win32",
     });
 
     const stdoutBuffer = createCapturedOutputBuffer();
@@ -368,10 +366,9 @@ async function maybePreflightMigrations(options = {}) {
     return;
   }
 
-  const migrate = spawn(pnpmBin, ["db:migrate"], {
+  const migrate = spawnPnpm(["db:migrate"], {
     stdio: "inherit",
     env,
-    shell: process.platform === "win32",
   });
   const exit = await new Promise((resolve) => {
     migrate.on("exit", (code, signal) => resolve({ code: code ?? 0, signal }));
@@ -468,10 +465,9 @@ async function startServerChild() {
   await buildPluginSdk();
 
   const serverScript = mode === "watch" ? "dev:watch" : "dev";
-  child = spawn(
-    pnpmBin,
+  child = spawnPnpm(
     ["--filter", "@paperclipai/server", serverScript, ...forwardedArgs],
-    { stdio: "inherit", env, shell: process.platform === "win32" },
+    { stdio: "inherit", env },
   );
 
   childExitPromise = new Promise((resolve, reject) => {

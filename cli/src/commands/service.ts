@@ -1,3 +1,4 @@
+import { secureRandom } from "@paperclipai/shared/secure-random";
 import fs from "node:fs/promises";
 import path from "node:path";
 import * as p from "@clack/prompts";
@@ -62,7 +63,7 @@ export async function withHotRestartLock<T>(
 ): Promise<T> {
   const instanceRoot = resolvePaperclipInstanceRoot(instanceId);
   const lockPath = path.join(instanceRoot, "hot-restart.lock");
-  const token = `${process.pid}:${Date.now()}:${Math.random().toString(16).slice(2)}`;
+  const token = `${process.pid}:${Date.now()}:${secureRandom().toString(16).slice(2)}`;
   const deadline = Date.now() + (options.timeoutMs ?? 120_000);
   const pollMs = options.pollMs ?? 100;
   const isProcessAlive = options.isProcessAlive ?? ((pid: number) => {

@@ -23,7 +23,9 @@ function isValidShellEnvKey(value: string): boolean {
 function randomToken(): string {
   const uuid = globalThis.crypto?.randomUUID?.();
   if (typeof uuid === "string" && uuid.length > 0) return uuid.replace(/[^a-zA-Z0-9-]/g, "");
-  return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  const bytes = new Uint8Array(16);
+  globalThis.crypto.getRandomValues(bytes);
+  return `${Date.now()}-${Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("")}`;
 }
 
 export function buildLoginShellScript(input: {

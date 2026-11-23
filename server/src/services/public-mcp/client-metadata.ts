@@ -8,6 +8,30 @@ export function validMcpRedirect(value: string) {
       && (url.protocol === "https:" || (url.protocol === "http:" && ["localhost", "127.0.0.1", "[::1]"].includes(url.hostname)));
   } catch { return false; }
 }
+/**
+ * Parses `PAPERCLIP_MCP_OAUTH_REDIRECT_ORIGINS`, a comma-separated list of HTTPS origins that
+ * OAuth clients may register redirect URIs on. Returns undefined when unset (any valid redirect
+ * is accepted, the standard dynamic-registration behavior).
+ */
+export function parseMcpRedirectOriginAllowlist(value: string | undefined): string[] | undefined {
+  const entries = (value ?? "").split(",").map(entry => entry.trim()).filter(Boolean);
+  if (entries.length === 0) return undefined;
+  return entries.map(entry => {
+    const url = new URL(entry);
+    if (url.protocol !== "https:" || url.username || url.password || url.search || url.hash || url.pathname !== "/") {
+      throw new Error("PAPERCLIP_MCP_OAUTH_REDIRECT_ORIGINS entries must be HTTPS origins such as https://client.example.com");
+    }
+    return url.origin;
+  });
+}
+/** With an allowlist, a redirect URI must be on an allowed origin; native loopback listeners stay allowed (RFC 8252). */
+export function mcpRedirectAllowed(uri: string, allowlist: readonly string[] | undefined) {
+  if (!validMcpRedirect(uri)) return false;
+  if (!allowlist) return true;
+  const url = new URL(uri);
+  if (url.protocol === "http:") return true;
+  return allowlist.includes(url.origin);
+}
 /** RFC 8252: native loopback listeners choose an ephemeral port, not a new callback. */
 export function mcpRedirectMatches(registered: string[], requested: string, native: boolean) {
   if (registered.includes(requested)) return true;

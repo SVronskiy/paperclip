@@ -1,3 +1,4 @@
+import { safeRedirect } from "./safe-redirect.js";
 import { Router, type Request } from "express";
 import { eq } from "drizzle-orm";
 import { companies, type Db } from "@paperclipai/db";
@@ -92,7 +93,7 @@ export function tailscaleConnectionRoutes(db: Db) {
     res.setHeader("Cache-Control", "no-store");
     res.setHeader("Referrer-Policy", "no-referrer");
     const params = new URLSearchParams({ tailscale_connection: result.id, ...(reason ? { tailscale_error: reason } : {}) });
-    res.redirect(303, `/${encodeURIComponent(company!.prefix)}/apps/tailscale?${params}`);
+    safeRedirect(res, 303, `/${encodeURIComponent(company!.prefix)}/apps/tailscale?${params}`);
   });
   return router;
 }

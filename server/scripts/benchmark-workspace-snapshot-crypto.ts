@@ -72,6 +72,7 @@ async function store() {
   const objects = new Map<string, { parts: Array<{ file: string; size: number }>; size: number; etag: string }>();
   const uploads = new Map<string, Map<number, { file: string; size: number; etag: string }>>();
   const receive = async (request: IncomingMessage, file: string) => {
+    // Content-MD5 is what the S3 protocol (and the hosted backend) checks; this fake store must match it.
     const digest = createHash("md5"); let size = 0;
     const output = createWriteStream(file);
     request.on("data", (chunk: Buffer) => { digest.update(chunk); size += chunk.length; });

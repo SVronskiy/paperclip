@@ -19,7 +19,7 @@ import { withExternalAdmissionGuard } from "../../modules/external-agents/index.
 import { assertMuseCurrentAuthority, revokeMuseOAuthGrant } from "../muse-identity.js";
 import { boardAuthService } from "../board-auth.js";
 import { logActivity } from "../activity-log.js";
-import { createClientMetadataResolver, mcpRedirectMatches, validMcpRedirect as validRedirect, type MetadataFetch } from "./client-metadata.js";
+import { createClientMetadataResolver, mcpRedirectAllowed, mcpRedirectMatches, parseMcpRedirectOriginAllowlist, validMcpRedirect as validRedirect, type MetadataFetch } from "./client-metadata.js";
 import { beginMuseCodeExchange, decideMuseCodeExchange, observeMuseCodeBinding, publishMuseCodeActivities, recordMuseCodeRejection, recordMuseCodeSuccess, type MuseCodeExchangeCheck, type MuseCodeExchangeObservation } from "./muse-oauth-diagnostics.js";
 
 const minute = 60_000;
@@ -53,7 +53,9 @@ export function publicMcpConfig(env: NodeJS.ProcessEnv = process.env, authPublic
   // token exchange and callback delivery remain on the public MCP origin.
   const authorizationOrigin = env.PAPERCLIP_MCP_AUTHORIZATION_ORIGIN
     ? normalizeOrigin(env.PAPERCLIP_MCP_AUTHORIZATION_ORIGIN, "PAPERCLIP_MCP_AUTHORIZATION_ORIGIN") : undefined;
-  return { origin: publicOrigin, resource: publicOrigin + PUBLIC_MCP_PATH, ...(authorizationOrigin ? { authorizationOrigin } : {}) };
+  // Optional: restrict which origins OAuth clients may register redirect URIs on.
+  const redirectOriginAllowlist = parseMcpRedirectOriginAllowlist(env.PAPERCLIP_MCP_OAUTH_REDIRECT_ORIGINS);
+  return { origin: publicOrigin, resource: publicOrigin + PUBLIC_MCP_PATH, ...(authorizationOrigin ? { authorizationOrigin } : {}), ...(redirectOriginAllowlist ? { redirectOriginAllowlist } : {}) };
 }
 export type PublicMcpConfig = NonNullable<ReturnType<typeof publicMcpConfig>>;
 export type McpPrincipal = {
@@ -207,6 +209,9 @@ export function createPublicMcpOAuth(db: Db, config: PublicMcpConfig, options: {
     catch (error) {
       if (error instanceof McpOAuthError) throw error;
       throw new McpOAuthError("invalid_client_metadata", "Could not verify the client's public metadata.");
+    }
+    if (metadata.redirect_uris.some(uri => !mcpRedirectAllowed(uri, config.redirectOriginAllowlist))) {
+      throw new McpOAuthError("invalid_client_metadata", "The client's redirect URIs are not on an origin this server accepts.");
     }
     return { id, name: metadata.client_name, redirectUris: metadata.redirect_uris,
       grantTypes: metadata.grant_types, native: metadata.application_type === "native" };
@@ -491,6 +496,7 @@ export function createPublicMcpOAuth(db: Db, config: PublicMcpConfig, options: {
       if (!parsed.success) throw new McpOAuthError("invalid_client_metadata", "Supply a client name, valid redirect URIs, and public-client PKCE authentication.");
       if (museAgentConnection && parsed.data.grant_types.some(type => type !== "authorization_code" && type !== "refresh_token")) throw new McpOAuthError("invalid_client_metadata", "Muse supports authorization code and rotating refresh only.");
       if (parsed.data.grant_types.includes("authorization_code") && parsed.data.redirect_uris.length === 0) throw new McpOAuthError("invalid_client_metadata", "Authorization code clients need a redirect URI.");
+      if (parsed.data.redirect_uris.some(uri => !mcpRedirectAllowed(uri, config.redirectOriginAllowlist))) throw new McpOAuthError("invalid_redirect_uri", "A redirect URI is not on an origin this server accepts for client registration.");
       const client = { id: secret("pcmcp_client_"), name: parsed.data.client_name, registrationSourceHash: hashMcpSecret(config.resource + ":" + source), redirectUris: parsed.data.redirect_uris, grantTypes: parsed.data.grant_types };
       await db.transaction(async (tx) => {
         // Bound public DCR across replicas, not only per-IP in each process.

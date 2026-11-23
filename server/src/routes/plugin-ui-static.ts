@@ -171,9 +171,9 @@ export function resolvePluginUiDir(
  * This is a lightweight approach that avoids reading the file content.
  */
 function computeETag(size: number, mtimeMs: number): string {
-  const ETAG_VERSION = "v2";
+  const ETAG_VERSION = "v3";
   const hash = crypto
-    .createHash("md5")
+    .createHash("sha256")
     .update(`${ETAG_VERSION}:${size}-${mtimeMs}`)
     .digest("hex")
     .slice(0, 16);
@@ -490,10 +490,12 @@ export function pluginUiStaticRoutes(db: Db, options: PluginUiStaticRouteOptions
     res.set("Access-Control-Allow-Origin", "*");
 
     // Step 10: Send the file
-    // The plugin source can live in Git worktrees (e.g. ".worktrees/...").
-    // `send` defaults to dotfiles:"ignore", which treats dot-directories as
-    // not found. We already enforce traversal safety above, so allow dot paths.
-    res.sendFile(resolvedFilePath, { dotfiles: "allow" }, (err) => {
+    // Serve it relative to the plugin's UI directory with `root`, so `send`
+    // applies its dotfile policy only to the part of the path inside that
+    // directory. The plugin source can live under a dot directory (for example
+    // ".worktrees/..."), which is fine, but hidden files and directories inside
+    // the UI bundle itself (".env", ".git/...") are denied.
+    res.sendFile(relative, { root: realUiDir, dotfiles: "deny" }, (err) => {
       if (err) {
         log.error(
           { err, pluginId: plugin.id, filePath: resolvedFilePath },
@@ -501,7 +503,11 @@ export function pluginUiStaticRoutes(db: Db, options: PluginUiStaticRouteOptions
         );
         // Only send error if headers haven't been sent yet
         if (!res.headersSent) {
-          res.status(500).json({ error: "Failed to serve file" });
+          // `send` rejects a denied dotfile with 403 and a missing file with 404.
+          const status = (err as { status?: number }).status;
+          if (status === 403) res.status(403).json({ error: "Access denied" });
+          else if (status === 404) res.status(404).json({ error: "File not found" });
+          else res.status(500).json({ error: "Failed to serve file" });
         }
       }
     });

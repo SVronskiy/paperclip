@@ -1,3 +1,4 @@
+import { secureRandom } from "@paperclipai/shared/secure-random";
 import { hasPendingRunCleanup } from "../execution-blocker.js";
 import { runOwnerFenceHeldSql } from "../remote-workspace-writer-hold.js";
 import { AGENT_DIRECTORY_BUSY_ERROR_CODE, AGENT_DIRECTORY_BUSY_MAX_DEFERRALS, AGENT_DIRECTORY_BUSY_RETRY_REASON, AGENT_DIRECTORY_BUSY_RETRY_WAKE_REASON, agentDirectoryBusyRetryDelayMs, type AgentDirectoryPreparationDeferral } from "./agent-directory-busy.js";
@@ -296,7 +297,7 @@ export function isWorkspaceBusyDeferral(
 }
 
 export function computeWorkspaceBusyRetryDelayMs(
-  random: () => number = Math.random,
+  random: () => number = secureRandom,
 ) {
   const jitter = Math.min(Math.max(random(), 0), 1);
   return (
@@ -433,7 +434,7 @@ function isRetryableInteractionContinuationInfrastructureFailure(
 export function computeBoundedTransientHeartbeatRetrySchedule(
   attempt: number,
   now = new Date(),
-  random: () => number = Math.random,
+  random: () => number = secureRandom,
 ) {
   if (!Number.isInteger(attempt) || attempt <= 0) return null;
   const baseDelayMs = BOUNDED_TRANSIENT_HEARTBEAT_RETRY_DELAYS_MS[attempt - 1];
@@ -458,7 +459,7 @@ export function computeBoundedTransientHeartbeatRetrySchedule(
 export function computeInterruptedPreparationRetrySchedule(
   attempt: number,
   now = new Date(),
-  random: () => number = Math.random,
+  random: () => number = secureRandom,
 ) {
   if (!Number.isInteger(attempt) || attempt <= 0) return null;
   if (attempt === 1) {

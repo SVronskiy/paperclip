@@ -1,3 +1,4 @@
+import { secureRandom } from "@paperclipai/shared/secure-random";
 import fs from "node:fs";
 import path from "node:path";
 import { resolvePaperclipHomeDir } from "./config/home.js";
@@ -57,7 +58,7 @@ function assertOwnedByCurrentUser(stat: fs.Stats, targetPath: string): void {
 function writeFileAtomic(filePath: string, contents: string, mode: number): void {
   const temporaryPath = path.join(
     path.dirname(filePath),
-    `.${path.basename(filePath)}.tmp-${process.pid}-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+    `.${path.basename(filePath)}.tmp-${process.pid}-${Date.now()}-${secureRandom().toString(16).slice(2)}`,
   );
   try {
     fs.writeFileSync(temporaryPath, contents, { mode, flag: "wx" });
@@ -150,7 +151,7 @@ export async function withInstallStoreLock<T>(
   options: { initialize?: boolean } = {},
 ): Promise<T> {
   if (options.initialize !== false) initializeInstallStore(paths);
-  const token = `${process.pid}:${Date.now()}:${Math.random().toString(16).slice(2)}`;
+  const token = `${process.pid}:${Date.now()}:${secureRandom().toString(16).slice(2)}`;
   const processIsAlive = (pid: number): boolean => {
     try {
       process.kill(pid, 0);
@@ -278,7 +279,7 @@ export function flipCurrentAtomic(
 
   const temporaryLink = path.join(
     paths.cliRoot,
-    `.current-${process.pid}-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+    `.current-${process.pid}-${Date.now()}-${secureRandom().toString(16).slice(2)}`,
   );
   const relativeTarget = path.relative(paths.cliRoot, payloadPath);
   try {

@@ -1,3 +1,4 @@
+import { secureRandom } from "@paperclipai/shared/secure-random";
 import { useCallback, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { DocumentAnnotationComment, DocumentAnnotationThreadStatus, DocumentAnnotationThreadWithComments } from "@paperclipai/shared";
@@ -118,7 +119,7 @@ export function useDocumentAnnotationMutations(options: MutationOptions) {
 }
 
 function messageFor(error: unknown, fallback: string) { return error instanceof Error && error.message ? error.message : fallback; }
-function optimisticId(prefix: string) { return `${prefix}-${typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`}`; }
+function optimisticId(prefix: string) { return `${prefix}-${typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${secureRandom()}`}`; }
 function buildOptimisticComment(body: string, threadId: string, target: DocumentAnnotationTarget, userId: string | null): DocumentAnnotationComment {
   const now = new Date();
   return { id: optimisticId("optimistic-comment"), companyId: "", threadId, issueId: target.kind === "issue" ? target.issueId : null, routineId: target.kind === "routine" ? target.routineId : null, caseId: target.kind === "case" ? target.caseId : null, documentId: "", body, authorType: "user", authorAgentId: null, authorUserId: userId, createdByRunId: null, issueCommentId: null, createdAt: now, updatedAt: now };

@@ -1,3 +1,4 @@
+import { secureRandom } from "@paperclipai/shared/secure-random";
 import { createUuid } from "@/lib/uuid";
 import { ANALYTICS_MASK_CLASS } from "@/lib/analytics/privacy";
 import { useCurrentAccountGuard } from "../hooks/useAccountBoundMutation";
@@ -5253,7 +5254,7 @@ const IssueChatComposer = forwardRef<
     file: File,
     insertInline = true,
   ): Promise<string | undefined> {
-    const attachmentId = `${file.name}:${file.size}:${file.lastModified}:${Math.random().toString(36).slice(2)}`;
+    const attachmentId = `${file.name}:${file.size}:${file.lastModified}:${secureRandom().toString(36).slice(2)}`;
     const inline = file.type.startsWith("image/");
     setComposerAttachments((prev) => [
       ...prev,

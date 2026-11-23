@@ -14,6 +14,7 @@
 //     which exports the measurements, Web Vitals, and API request spans.
 // See doc/browser-performance-tracing.md.
 
+import { secureRandom } from "@paperclipai/shared/secure-random";
 import type { QueryClient } from "@tanstack/react-query";
 import type { BrowserTracingConfig } from "@paperclipai/shared";
 import { whenPageSettles } from "@/lib/when-page-settles";
@@ -72,7 +73,7 @@ export const SDK_LOAD_DEADLINE_MS = PAGE_LOAD_TIMEOUT_MS + 5_000;
 let sessionSampled: boolean | null = null;
 
 /** One decision per page session, so a sampled session is complete. */
-export function isPageSessionSampled(sampleRate: number, random: () => number = Math.random): boolean {
+export function isPageSessionSampled(sampleRate: number, random: () => number = secureRandom): boolean {
   if (sessionSampled === null) sessionSampled = random() < sampleRate;
   return sessionSampled;
 }

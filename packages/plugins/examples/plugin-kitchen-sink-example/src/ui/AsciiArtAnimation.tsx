@@ -1,3 +1,4 @@
+import { secureRandom } from "@paperclipai/shared/secure-random";
 import { useEffect, useRef } from "react";
 
 const CHARS = [" ", ".", "·", "▪", "▫", "○"] as const;
@@ -151,24 +152,24 @@ export function AsciiArtAnimation() {
     }
 
     function spawnClip() {
-      const sprite = PAPERCLIP_SPRITES[Math.floor(Math.random() * PAPERCLIP_SPRITES.length)]!;
+      const sprite = PAPERCLIP_SPRITES[Math.floor(secureRandom() * PAPERCLIP_SPRITES.length)]!;
       const size = spriteSize(sprite);
-      const edge = Math.random();
+      const edge = secureRandom();
       let x = 0;
       let y = 0;
       let vx = 0;
       let vy = 0;
 
       if (edge < 0.68) {
-        x = Math.random() < 0.5 ? -size.width - 1 : cols + 1;
-        y = Math.random() * Math.max(1, rows - size.height);
-        vx = x < 0 ? 0.04 + Math.random() * 0.05 : -(0.04 + Math.random() * 0.05);
-        vy = (Math.random() - 0.5) * 0.014;
+        x = secureRandom() < 0.5 ? -size.width - 1 : cols + 1;
+        y = secureRandom() * Math.max(1, rows - size.height);
+        vx = x < 0 ? 0.04 + secureRandom() * 0.05 : -(0.04 + secureRandom() * 0.05);
+        vy = (secureRandom() - 0.5) * 0.014;
       } else {
-        x = Math.random() * Math.max(1, cols - size.width);
-        y = Math.random() < 0.5 ? -size.height - 1 : rows + 1;
-        vx = (Math.random() - 0.5) * 0.014;
-        vy = y < 0 ? 0.028 + Math.random() * 0.034 : -(0.028 + Math.random() * 0.034);
+        x = secureRandom() * Math.max(1, cols - size.width);
+        y = secureRandom() < 0.5 ? -size.height - 1 : rows + 1;
+        vx = (secureRandom() - 0.5) * 0.014;
+        vy = y < 0 ? 0.028 + secureRandom() * 0.034 : -(0.028 + secureRandom() * 0.034);
       }
 
       clips.push({
@@ -177,8 +178,8 @@ export function AsciiArtAnimation() {
         vx,
         vy,
         life: 0,
-        maxLife: 260 + Math.random() * 220,
-        drift: (Math.random() - 0.5) * 1.2,
+        maxLife: 260 + secureRandom() * 220,
+        drift: (secureRandom() - 0.5) * 1.2,
         sprite,
         width: size.width,
         height: size.height,

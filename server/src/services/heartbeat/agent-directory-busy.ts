@@ -1,3 +1,4 @@
+import { secureRandom } from "@paperclipai/shared/secure-random";
 import type { Db } from "@paperclipai/db";
 import { AgentDirectoryOperationBusyError } from "../agent-directory-working-copies.js";
 import { deferNativeRunForBusyAgentDirectory } from "../native-runtime/native-controller-recovery.js";
@@ -37,7 +38,7 @@ export async function prepareWithAgentDirectoryDeferral<T>(prepare: () => Promis
   }
 }
 
-export function agentDirectoryBusyRetryDelayMs(random: () => number = Math.random): number {
+export function agentDirectoryBusyRetryDelayMs(random: () => number = secureRandom): number {
   return AGENT_DIRECTORY_BUSY_RETRY_MIN_MS + Math.floor(Math.min(Math.max(random(), 0), 0.999) * AGENT_DIRECTORY_BUSY_RETRY_JITTER_MS);
 }
 

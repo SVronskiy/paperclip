@@ -1,5 +1,5 @@
 #!/usr/bin/env -S node --import tsx
-import { spawn } from "node:child_process";
+import { spawnPnpm } from "./lib/pnpm-invocation.mjs";
 import { randomUUID } from "node:crypto";
 import { existsSync, mkdirSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
 import path from "node:path";
@@ -240,7 +240,6 @@ if (existingRunner) {
   process.exit(0);
 }
 
-const pnpmBin = process.platform === "win32" ? "pnpm.cmd" : "pnpm";
 let previousSnapshot = collectWatchedSnapshot();
 let dirtyPaths = new Set<string>();
 let pendingMigrations: string[] = [];
@@ -250,7 +249,7 @@ let scanInFlight = false;
 let restartInFlight = false;
 let shuttingDown = false;
 let childExitWasExpected = false;
-let child: ReturnType<typeof spawn> | null = null;
+let child: ReturnType<typeof spawnPnpm> | null = null;
 let childExitPromise: Promise<{ code: number; signal: NodeJS.Signals | null }> | null = null;
 let scanTimer: ReturnType<typeof setInterval> | null = null;
 let autoRestartTimer: ReturnType<typeof setInterval> | null = null;
@@ -376,11 +375,10 @@ async function runPnpm(args: string[], options: {
   cwd?: string;
 } = {}) {
   return await new Promise<{ code: number; signal: NodeJS.Signals | null; stdout: string; stderr: string }>((resolve, reject) => {
-    const spawned = spawn(pnpmBin, args, {
+    const spawned = spawnPnpm(args, {
       stdio: options.stdio ?? ["ignore", "pipe", "pipe"],
       env: options.env ?? process.env,
       cwd: options.cwd,
-      shell: process.platform === "win32",
     });
 
     const stdoutBuffer = createCapturedOutputBuffer();
@@ -717,10 +715,9 @@ async function startServerChild() {
   await buildPluginSdk();
 
   const serverScript = mode === "watch" ? "dev:watch" : "dev";
-  child = spawn(
-    pnpmBin,
+  child = spawnPnpm(
     ["--filter", "@paperclipai/server", serverScript, ...forwardedArgs],
-    { stdio: "inherit", env, shell: process.platform === "win32" },
+    { stdio: "inherit", env },
   );
 
   childExitPromise = new Promise((resolve, reject) => {

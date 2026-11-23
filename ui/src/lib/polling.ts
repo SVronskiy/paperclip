@@ -1,3 +1,4 @@
+import { secureRandom } from "@paperclipai/shared/secure-random";
 import { useMemo, useRef } from "react";
 import { getPageVisibility, usePageVisibility, type PageVisibility } from "./page-visibility";
 
@@ -101,7 +102,7 @@ export function useVisibilityRefetchInterval(options: VisibilityRefetchOptions):
       jitterRef.current = 0;
     } else {
       const bound = Math.min(options.jitterMaxMs ?? 1_000, Math.round(options.visibleMs * 0.2));
-      jitterRef.current = computeStartupJitterMs(bound, Math.random);
+      jitterRef.current = computeStartupJitterMs(bound, secureRandom);
     }
   }
   const jitter = jitterRef.current;
@@ -129,7 +130,7 @@ export function useStartupJitterMs(opts?: {
   if (ref.current === null) {
     const state = getPageVisibility();
     const bound = jitterBoundForVisibility(state, opts);
-    ref.current = computeStartupJitterMs(bound, Math.random);
+    ref.current = computeStartupJitterMs(bound, secureRandom);
   }
   return ref.current;
 }

@@ -1,3 +1,4 @@
+import { randomBytes } from "node:crypto";
 import type {
   AdapterEnvironmentCheck,
   AdapterEnvironmentTestContext,
@@ -96,7 +97,7 @@ export async function testEnvironment(
   const targetLabel = targetIsRemote
     ? ctx.environmentName ?? describeAdapterExecutionTarget(target)
     : null;
-  const runId = `cursor-envtest-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  const runId = `cursor-envtest-${Date.now()}-${randomBytes(8).toString("hex")}`;
 
   if (targetLabel) {
     checks.push({

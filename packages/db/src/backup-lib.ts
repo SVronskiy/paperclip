@@ -1,3 +1,4 @@
+import { secureRandom } from "@paperclipai/shared/secure-random";
 import { createReadStream, createWriteStream, existsSync, mkdirSync, readdirSync, statSync, unlinkSync } from "node:fs";
 import { basename, resolve } from "node:path";
 import { createInterface } from "node:readline";
@@ -199,7 +200,7 @@ function formatSqlLiteral(value: string): string {
   const sanitized = value.replace(/\u0000/g, "");
   let tag = "$paperclip$";
   while (sanitized.includes(tag)) {
-    tag = `$paperclip_${Math.random().toString(36).slice(2, 8)}$`;
+    tag = `$paperclip_${secureRandom().toString(36).slice(2, 8)}$`;
   }
   return `${tag}${sanitized}${tag}`;
 }

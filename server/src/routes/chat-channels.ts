@@ -1,3 +1,4 @@
+import { safeRedirect } from "./safe-redirect.js";
 import { connectionManagementService } from "../services/connection-management.js";
 import { chatCredentialRotationId, connectionIntentService, savedChatSetupPath } from "../services/connection-intents.js";
 import { companies } from "@paperclipai/db";
@@ -258,7 +259,7 @@ export function chatChannelRoutes(db: Db, options: ChatChannelRouteOptions) {
     const actor = slackActor(req);
     const state = typeof req.query.state === "string" ? req.query.state : "";
     const expiredId = await service.slackRegistration.managerGrants.expiredReturn(state, actor);
-    if (expiredId) { res.redirect(303, await service.slackRegistration.returnPath(expiredId)); return; }
+    if (expiredId) { safeRedirect(res, 303, await service.slackRegistration.returnPath(expiredId)); return; }
     const pending = await service.slackRegistration.managerGrants.pending(state, actor);
     await assertConnectionManager(req, pending.current.endpoint.companyId);
     if (req.get("accept")?.includes("text/html") && isCrossSiteOAuthCallbackNavigation(req)) {
@@ -268,7 +269,7 @@ export function chatChannelRoutes(db: Db, options: ChatChannelRouteOptions) {
       typeof req.query.claim_id === "string" ? req.query.claim_id : null,
       typeof req.query.error === "string" ? req.query.error : null, actor,
       typeof req.query.code === "string" ? req.query.code : null);
-    res.redirect(303, await service.slackRegistration.returnPath(id));
+    safeRedirect(res, 303, await service.slackRegistration.returnPath(id));
   });
   router.post("/chat-endpoints/:endpointId/slack/test-message", managementGuard("connections:test", "POST /chat-endpoints/:endpointId/slack/test-message"), validate(slackTestMessageSchema), async (req, res) => {
     if (!(await assertEndpointManagementAccess(req, res))) return;
@@ -300,7 +301,7 @@ export function chatChannelRoutes(db: Db, options: ChatChannelRouteOptions) {
     const actor = slackActor(req);
     const state = typeof req.query.state === "string" ? req.query.state : "";
     const expiredReturn = await service.slackRegistration.expiredReturn(state, actor);
-    if (expiredReturn) { res.redirect(303, expiredReturn); return; }
+    if (expiredReturn) { safeRedirect(res, 303, expiredReturn); return; }
     const pending = await service.slackRegistration.pending(state, actor);
     await assertConnectionManager(req, pending.row.companyId);
     if (req.get("accept")?.includes("text/html") && isCrossSiteOAuthCallbackNavigation(req)) {
@@ -310,7 +311,7 @@ export function chatChannelRoutes(db: Db, options: ChatChannelRouteOptions) {
     const endpoint = await service.slackRegistration.complete(state,
       typeof req.query.code === "string" ? req.query.code : null,
       typeof req.query.error === "string" ? req.query.error : null, actor);
-    res.redirect(303, await service.slackRegistration.returnPath(endpoint));
+    safeRedirect(res, 303, await service.slackRegistration.returnPath(endpoint));
   });
 
   const githubUser = (req: ExpressRequest) => {

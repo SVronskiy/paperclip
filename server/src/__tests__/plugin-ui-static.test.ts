@@ -109,6 +109,29 @@ describe("plugin UI static route", () => {
     expect(mockRegistry.getConfig).not.toHaveBeenCalled();
   });
 
+  it("serves a plugin that lives under a dot directory, but never hidden files inside its UI bundle", async () => {
+    const packageRoot = path.join(tmpdir(), `paperclip-plugin-ui-static-${randomUUID()}`, ".worktrees", "plugin");
+    const uiDir = path.join(packageRoot, "dist", "ui");
+    mkdirSync(path.join(uiDir, ".git"), { recursive: true });
+    writeFileSync(path.join(uiDir, "index.js"), "export const marker = 'dot-parent';\n");
+    writeFileSync(path.join(uiDir, ".env"), "SECRET=1\n");
+    writeFileSync(path.join(uiDir, ".git", "config"), "[core]\n");
+    tempDirs.push(path.join(packageRoot, "..", ".."));
+    readyPlugin(packageRoot);
+    const app = await createApp({ type: "none", source: "none" });
+
+    const asset = await request(app).get(`/_plugins/${pluginId}/ui/index.js`);
+    expect(asset.status).toBe(200);
+    expect(asset.text).toContain("dot-parent");
+
+    for (const hidden of [".env", ".git/config"]) {
+      const res = await request(app).get(`/_plugins/${pluginId}/ui/${hidden}`);
+      expect([403, 404]).toContain(res.status);
+      expect(res.text).not.toContain("SECRET=1");
+      expect(res.text).not.toContain("[core]");
+    }
+  });
+
   it.each([200, 404])("resolves plugin keys without querying the UUID column (%s)", async (status) => {
     readyPlugin(createPluginPackage("export const marker = 'key-bundle';\n"));
     const plugin = await mockRegistry.getById();

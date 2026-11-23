@@ -1,3 +1,4 @@
+import { secureRandom } from "@paperclipai/shared/secure-random";
 /**
  * Cross-tab shared polling coordination (PAP-12557 / Phase 2 of PAP-12542).
  *
@@ -54,7 +55,7 @@ export interface LeaseStore {
 export interface LeaderElectionEnv {
   now: () => number;
   store: LeaseStore;
-  /** Injectable RNG in [0,1) for grace jitter. Defaults to Math.random. */
+  /** Injectable RNG in [0,1) for grace jitter. Defaults to secureRandom. */
   random?: () => number;
 }
 
@@ -100,7 +101,7 @@ export class LeaderElection {
     this.ttl = options.leaseTtlMs ?? DEFAULT_LEASE_TTL_MS;
     const base = options.hiddenGraceMs ?? 4_000;
     const jitterMax = options.hiddenGraceJitterMs ?? 4_000;
-    const rng = env.random ?? Math.random;
+    const rng = env.random ?? secureRandom;
     this.hiddenGrace = base + Math.round(Math.min(Math.max(rng(), 0), 0.999999) * jitterMax);
   }
 
@@ -495,7 +496,7 @@ function createRandomId(): string {
   if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
     return crypto.randomUUID();
   }
-  return `tab-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  return `tab-${Date.now()}-${secureRandom().toString(36).slice(2)}`;
 }
 
 function getBrowserVisible(): boolean {

@@ -1,3 +1,4 @@
+import { randomBytes } from "node:crypto";
 import path from "node:path";
 import type {
   AdapterEnvironmentCheck,
@@ -84,7 +85,7 @@ export async function testEnvironment(
   const targetLabel = targetIsRemote
     ? ctx.environmentName ?? describeAdapterExecutionTarget(target)
     : null;
-  const runId = `gemini-envtest-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  const runId = `gemini-envtest-${Date.now()}-${randomBytes(8).toString("hex")}`;
 
   if (targetLabel) {
     checks.push({

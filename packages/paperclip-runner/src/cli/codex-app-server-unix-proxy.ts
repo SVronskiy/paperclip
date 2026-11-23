@@ -36,6 +36,9 @@ function clientFrame(payload: Buffer, opcode = 0x1): Buffer {
 try {
   const socket = createConnection(socketArgument(process.argv.slice(2)));
   const websocketKey = randomBytes(16).toString("base64");
+  // SHA-1 is fixed by the WebSocket handshake (RFC 6455 section 4.2.2) and protects nothing:
+  // it only proves the peer read the upgrade request. Protocol exception, not a security hash.
+  // security-baseline-allow: RFC 6455 Sec-WebSocket-Accept
   const expectedAccept = createHash("sha1")
     .update(`${websocketKey}${websocketGuid}`)
     .digest("base64");

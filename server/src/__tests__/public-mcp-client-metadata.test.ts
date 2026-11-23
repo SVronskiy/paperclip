@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { createClientMetadataResolver, mcpRedirectMatches, type MetadataFetch } from "../services/public-mcp/client-metadata.js";
+import { createClientMetadataResolver, mcpRedirectAllowed, mcpRedirectMatches, parseMcpRedirectOriginAllowlist, type MetadataFetch } from "../services/public-mcp/client-metadata.js";
 import { mcpInvitation, mcpSetupMarkdown } from "@paperclipai/shared";
 import { renderMcpSetup } from "../services/public-mcp/setup.js";
 
@@ -79,5 +79,29 @@ describe("assistant invitation content", () => {
     expect(markdown).not.toContain("pcmcp_at_");
     expect(renderMcpSetup(resource, company.id)).toContain("Instructions for assistants");
     expect(renderMcpSetup(resource, company.id)).not.toContain(company.name);
+  });
+});
+
+describe("OAuth client redirect origin allowlist", () => {
+  it("accepts any valid redirect when no allowlist is configured", () => {
+    expect(parseMcpRedirectOriginAllowlist(undefined)).toBeUndefined();
+    expect(parseMcpRedirectOriginAllowlist("  ")).toBeUndefined();
+    expect(mcpRedirectAllowed("https://anything.example/cb", undefined)).toBe(true);
+  });
+
+  it("limits registration to allowed HTTPS origins and keeps native loopback callbacks", () => {
+    const allowlist = parseMcpRedirectOriginAllowlist("https://client.example.com, https://other.example.org/");
+    expect(allowlist).toEqual(["https://client.example.com", "https://other.example.org"]);
+    expect(mcpRedirectAllowed("https://client.example.com/oauth/callback", allowlist)).toBe(true);
+    expect(mcpRedirectAllowed("https://evil.example.net/callback", allowlist)).toBe(false);
+    expect(mcpRedirectAllowed("https://client.example.com.evil.net/callback", allowlist)).toBe(false);
+    expect(mcpRedirectAllowed("http://127.0.0.1:8123/callback", allowlist)).toBe(true);
+    expect(mcpRedirectAllowed("http://evil.example.net/callback", allowlist)).toBe(false);
+    expect(mcpRedirectAllowed("javascript:alert(1)", allowlist)).toBe(false);
+  });
+
+  it("rejects allowlist entries that are not plain HTTPS origins", () => {
+    expect(() => parseMcpRedirectOriginAllowlist("http://client.example.com")).toThrow(/HTTPS origins/);
+    expect(() => parseMcpRedirectOriginAllowlist("https://client.example.com/path")).toThrow(/HTTPS origins/);
   });
 });

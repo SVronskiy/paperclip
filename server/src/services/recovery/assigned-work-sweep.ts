@@ -1,3 +1,4 @@
+import { secureRandom } from "@paperclipai/shared/secure-random";
 import { createHash } from "node:crypto";
 import { and, desc, eq, gte, inArray, isNull, or, sql, type SQL, type SQLWrapper } from "drizzle-orm";
 import {
@@ -742,7 +743,7 @@ export function assignedWorkSweep(db: Db, deps: AssignedWorkDeps) {
     const minuteAgo = at.getTime() - 60_000;
     while (repairTimes.length && repairTimes[0] <= minuteAgo) repairTimes.shift();
     return repairTimes.length >= ASSIGNED_WORK_REPAIRS_PER_MINUTE
-      ? new Date(repairTimes[0] + 60_000 + Math.floor(Math.random() * 5_000)) : null;
+      ? new Date(repairTimes[0] + 60_000 + Math.floor(secureRandom() * 5_000)) : null;
   }
 
   function reportStalledRun(issue: IssueRow, runId: string, stall: NonNullable<AssignedWorkFacts["activeRuns"][number]["queuedStall"]> | null, at: Date) {

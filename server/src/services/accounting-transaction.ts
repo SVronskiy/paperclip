@@ -1,3 +1,4 @@
+import { secureRandom } from "@paperclipai/shared/secure-random";
 import { eq } from "drizzle-orm";
 import { companies, type Db } from "@paperclipai/db";
 import { publishActivity, type ActivityPublication } from "./activity-log.js";
@@ -59,7 +60,7 @@ export const ACCOUNTING_TRANSACTION_ATTEMPTS = 8;
 const ACCOUNTING_RETRY_BASE_DELAY_MS = 10;
 const ACCOUNTING_RETRY_MAX_DELAY_MS = 400;
 
-export function accountingRetryDelayMs(attempt: number, random: () => number = Math.random): number {
+export function accountingRetryDelayMs(attempt: number, random: () => number = secureRandom): number {
   const ceiling = Math.min(ACCOUNTING_RETRY_MAX_DELAY_MS, ACCOUNTING_RETRY_BASE_DELAY_MS * 2 ** (attempt + 1));
   return Math.round(ceiling / 2 + random() * (ceiling / 2));
 }

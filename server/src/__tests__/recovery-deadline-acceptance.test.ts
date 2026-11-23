@@ -30,6 +30,17 @@ import { idleWorkSnapshot } from "../services/task-admission.js";
 import { idleDeadlineRowLimit, type IdleDeadlineOwners } from "../services/idle-deadline-types.js";
 import type { VerifiedIdleCapabilities } from "../services/idle-incoming-wake-capability.js";
 
+
+/** Makes `secureRandom()` return `value` by controlling the words read from `crypto.getRandomValues`. */
+function mockSecureRandom(value: number) {
+  const scaled = Math.round(value * 2 ** 53);
+  return vi.spyOn(globalThis.crypto, "getRandomValues").mockImplementation(((target: Uint32Array) => {
+    target[0] = Math.floor(scaled / 2 ** 26) * 32;
+    target[1] = (scaled % 2 ** 26) * 64;
+    return target;
+  }) as typeof crypto.getRandomValues);
+}
+
 const fixtureUrl = resolveExternalTestDatabaseUrl("PAPERCLIP_RECOVERY_DEADLINES_TEST_DATABASE_URL");
 const adminUrl = resolveExternalTestDatabaseUrl("PAPERCLIP_RECOVERY_DEADLINES_TEST_ADMIN_DATABASE_URL");
 const connectionFields = ["hostname", "port", "pathname"] as const;
@@ -406,7 +417,7 @@ describe.skipIf(!fixtureUrl)("recovery deadline producer, proof and resumed exec
   }, 60_000);
 
   it("cold-reconstructs an actual failed ordinary issue process with exact source settlement", async () => {
-    const jitter = vi.spyOn(Math, "random").mockReturnValue(0.5);
+    const jitter = mockSecureRandom(0.5);
     let f: Awaited<ReturnType<typeof actualCompanyFailure>>;
     try { f = await actualCompanyFailure(true, false); }
     finally { jitter.mockRestore(); }
@@ -498,7 +509,7 @@ describe.skipIf(!fixtureUrl)("recovery deadline producer, proof and resumed exec
 
   it("certifies actual never-dispatched preparation only after owned cleanup and cold-reconstructs its saved retry", async () => {
     const f = await claimedPreparationFailure();
-    const jitter = vi.spyOn(Math, "random").mockReturnValue(0.5);
+    const jitter = mockSecureRandom(0.5);
     try {
       const failed = await drivePreparationFailure({ db, heartbeat, control: f.control, entered: f.entered, persisted: f.persisted,
         companyId: f.companyId, agentId: f.agent.id, issueId: f.issue.id, run, owner: worker!.retries.reconciliationSnapshot }); jitter.mockRestore(); await settled();
@@ -558,7 +569,7 @@ describe.skipIf(!fixtureUrl)("recovery deadline producer, proof and resumed exec
   }, 60_000);
 
   it("leaves a failed optional preparation receipt blocked while normal cleanup and retry ownership complete", async () => {
-    const f = await claimedPreparationFailure(true); const jitter = vi.spyOn(Math, "random").mockReturnValue(0.5);
+    const f = await claimedPreparationFailure(true); const jitter = mockSecureRandom(0.5);
     try {
       const failed = await drivePreparationFailure({ db, heartbeat, control: f.control, entered: f.entered, persisted: f.persisted,
         companyId: f.companyId, agentId: f.agent.id, issueId: f.issue.id, run, owner: worker!.retries.reconciliationSnapshot }); jitter.mockRestore(); await settled();
@@ -577,7 +588,7 @@ describe.skipIf(!fixtureUrl)("recovery deadline producer, proof and resumed exec
     const execution = vi.spyOn(getServerAdapter("recovery_deadline_process"), "execute").mockResolvedValueOnce({
       exitCode: 75, signal: null, timedOut: false, errorCode: "codex_transient_upstream", errorFamily: "transient_upstream",
       executionRecovery: { kind: "bootstrap", providerWorkStarted: false } });
-    const jitter = vi.spyOn(Math, "random").mockReturnValue(0.5);
+    const jitter = mockSecureRandom(0.5);
     try {
       await start(); await settled();
       const admitted = await heartbeat.wakeup(f.agent.id, { source: "on_demand", reason: "manual", requestedByActorType: "system",

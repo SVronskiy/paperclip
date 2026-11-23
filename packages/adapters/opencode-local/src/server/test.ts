@@ -1,3 +1,4 @@
+import { randomBytes } from "node:crypto";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
@@ -79,7 +80,7 @@ export async function testEnvironment(
   const targetLabel = targetIsRemote
     ? ctx.environmentName ?? describeAdapterExecutionTarget(target)
     : null;
-  const runId = `opencode-envtest-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  const runId = `opencode-envtest-${Date.now()}-${randomBytes(8).toString("hex")}`;
 
   if (targetLabel) {
     checks.push({

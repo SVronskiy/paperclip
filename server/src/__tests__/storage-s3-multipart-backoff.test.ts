@@ -7,6 +7,17 @@ import { describe, expect, it, vi } from "vitest";
 import { THROTTLED_PART_ATTEMPTS, putS3MultipartFile } from "../storage/s3-multipart.js";
 import { collectStorageRequestStats, newStorageRequestStats } from "../storage/request-stats.js";
 
+
+/** Makes `secureRandom()` return `value` by controlling the words read from `crypto.getRandomValues`. */
+function mockSecureRandom(value: number) {
+  const scaled = Math.round(value * 2 ** 53);
+  return vi.spyOn(globalThis.crypto, "getRandomValues").mockImplementation(((target: Uint32Array) => {
+    target[0] = Math.floor(scaled / 2 ** 26) * 32;
+    target[1] = (scaled % 2 ** 26) * 64;
+    return target;
+  }) as typeof crypto.getRandomValues);
+}
+
 // Record each requested wait and resolve it at once, so the schedule is
 // observable without waiting for it.
 const waits = vi.hoisted(() => [] as number[]);
@@ -30,7 +41,7 @@ describe("file-backed S3 multipart backoff schedule", () => {
     await fs.writeFile(file, Buffer.alloc(size, 7), { mode: 0o600 });
     const client = new S3Client({ region: "us-east-1" });
     let partOneAttempts = 0;
-    const random = vi.spyOn(Math, "random").mockReturnValue(0.5);
+    const random = mockSecureRandom(0.5);
     const send = vi.spyOn(client, "send").mockImplementation(async (command: any) => {
       if (command instanceof CreateMultipartUploadCommand) return { UploadId: "upload" };
       if (command instanceof UploadPartCommand) {

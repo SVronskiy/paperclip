@@ -1,3 +1,4 @@
+import { secureRandom } from "@paperclipai/shared/secure-random";
 import {
   Component,
   createContext,
@@ -707,7 +708,7 @@ export function PluginLauncherProvider({ children }: { children: ReactNode }) {
           const component = await resolveLauncherComponent(contribution, launcher);
           const sourceRect = sourceEl?.getBoundingClientRect() ?? null;
           const nextEntry: LauncherInstance = {
-            key: `${launcher.pluginId}:${launcher.id}:${Date.now()}:${Math.random().toString(36).slice(2, 8)}`,
+            key: `${launcher.pluginId}:${launcher.id}:${Date.now()}:${secureRandom().toString(36).slice(2, 8)}`,
             launcher,
             hostContext,
             contribution,

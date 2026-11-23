@@ -16,6 +16,7 @@
 // Naming a tsconfig runs only that program and skips the coverage check.
 
 import { spawnSync } from "node:child_process";
+import { spawnPnpmSync } from "./lib/pnpm-invocation.mjs";
 import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -84,12 +85,10 @@ export function findUncheckedTests({ trackedFiles, checkedFiles, checkedElsewher
 }
 
 function runPnpm(args, { cwd, env }) {
-  const result = spawnSync("pnpm", args, {
+  const result = spawnPnpmSync(args, {
     cwd,
     env,
     stdio: "inherit",
-    // A bare `pnpm` on Windows is pnpm.cmd, which needs the shell to resolve.
-    shell: process.platform === "win32",
   });
   if (result.error) throw result.error;
   return result.status ?? 1;
@@ -115,11 +114,10 @@ function listProgramFiles(config, { cwd, env }) {
 }
 
 function listWorkspaceConfigs(root) {
-  const result = spawnSync("pnpm", ["ls", "-r", "--depth", "-1", "--json"], {
+  const result = spawnPnpmSync(["ls", "-r", "--depth", "-1", "--json"], {
     cwd: root,
     encoding: "utf8",
     maxBuffer: 1 << 26,
-    shell: process.platform === "win32",
   });
   if (result.error) throw result.error;
   if (result.status !== 0) throw new Error("Unable to list pnpm workspace packages.");

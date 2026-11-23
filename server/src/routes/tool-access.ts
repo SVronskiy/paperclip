@@ -1,3 +1,4 @@
+import { safeRedirect } from "./safe-redirect.js";
 import { isCrossSiteOAuthCallbackNavigation, oauthCallbackInterstitialHtml } from "../lib/oauth-browser-return.js";
 import { aiConnectionRouterPluginKey, isSamePaperclipInstance, paperclipPeerFromMcpUrl } from "@paperclipai/shared";
 import { aiConnectionRouterService } from "../services/ai-connection-router.js";
@@ -1320,7 +1321,7 @@ function connectorEnrollmentPrincipal(req: Request): string {
       res.type("html").send(cloudConnectorEnrollmentOutcomeHtml(company.issuePrefix, returnTo, interaction?.issueId));
       return;
     }
-    res.redirect(303, cloudConnectorEnrollmentReturnPath(company.issuePrefix, returnTo));
+    safeRedirect(res, 303, cloudConnectorEnrollmentReturnPath(company.issuePrefix, returnTo));
   });
 
   const handlePaperclipCloudConnectorCallback = async (req: Request, res: Response) => {
@@ -1406,7 +1407,7 @@ function connectorEnrollmentPrincipal(req: Request): string {
       }
       if (acceptsHtml) {
         const permissionsPath = await oauthAppPath(result.connection.companyId, result.connection.id);
-        res.redirect(303, `${permissionsPath}?success=1`);
+        safeRedirect(res, 303, `${permissionsPath}?success=1`);
         return;
       }
       res.json(result);
@@ -1452,7 +1453,7 @@ function connectorEnrollmentPrincipal(req: Request): string {
         return;
       }
       const outcome = details?.code === "oauth_authorization_denied" ? "denied" : "failed";
-      res.redirect(303, await oauthRecoveryPath(
+      safeRedirect(res, 303, await oauthRecoveryPath(
         pendingConnection,
         outcome,
         typeof details?.code === "string" ? details.code : null,
@@ -1529,7 +1530,7 @@ function connectorEnrollmentPrincipal(req: Request): string {
       }
       if (acceptsHtml) {
         const permissionsPath = await oauthAppPath(result.connection.companyId, result.connection.id);
-        res.redirect(303, `${permissionsPath}?success=1`);
+        safeRedirect(res, 303, `${permissionsPath}?success=1`);
         return;
       }
       res.json(result);
@@ -1565,7 +1566,7 @@ function connectorEnrollmentPrincipal(req: Request): string {
         });
         return;
       }
-      res.redirect(303, await oauthRecoveryPath(pendingConnection, "failed", callbackCode));
+      safeRedirect(res, 303, await oauthRecoveryPath(pendingConnection, "failed", callbackCode));
     }
   });
 
@@ -1671,7 +1672,7 @@ function connectorEnrollmentPrincipal(req: Request): string {
         });
         return;
       }
-      res.redirect(303, await oauthRecoveryPath(
+      safeRedirect(res, 303, await oauthRecoveryPath(
         pendingConnection,
         callbackErrorCode === "oauth_authorization_denied" ? "denied" : "failed",
         callbackFailureCode,
@@ -1709,7 +1710,7 @@ function connectorEnrollmentPrincipal(req: Request): string {
     }
     if (acceptsHtml) {
       const permissionsPath = await oauthAppPath(result.connection.companyId, result.connection.id);
-      res.redirect(303, `${permissionsPath}?success=1`);
+      safeRedirect(res, 303, `${permissionsPath}?success=1`);
       return;
     }
     res.json(result);

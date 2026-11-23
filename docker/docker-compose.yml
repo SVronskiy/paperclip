@@ -3,15 +3,17 @@ services:
     image: postgres:17-alpine
     environment:
       POSTGRES_USER: paperclip
-      POSTGRES_PASSWORD: paperclip
+      # No default password: generate one (for example `openssl rand -hex 24`).
+      # Use URL-safe characters only, because it is also embedded in DATABASE_URL.
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set}"
       POSTGRES_DB: paperclip
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U paperclip -d paperclip"]
       interval: 2s
       timeout: 5s
       retries: 30
-    ports:
-      - "5432:5432"
+    # The database port is intentionally not published. The server reaches it over
+    # the compose network as `db:5432`; use `docker compose exec db psql` for access.
     volumes:
       - pgdata:/var/lib/postgresql/data
 
@@ -33,7 +35,7 @@ services:
     ports:
       - "3100:3100"
     environment:
-      DATABASE_URL: postgres://paperclip:paperclip@db:5432/paperclip
+      DATABASE_URL: "postgres://paperclip:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set}@db:5432/paperclip"
       PORT: "3100"
       SERVE_UI: "true"
       PAPERCLIP_DEPLOYMENT_MODE: "authenticated"

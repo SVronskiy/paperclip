@@ -1,3 +1,4 @@
+import { secureRandom } from "@paperclipai/shared/secure-random";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -692,7 +693,7 @@ export async function testCodexAcpEnvironment(
       if (typeof value === "string") probeEnv[key] = value;
     }
     const versionCheck = await checkCodexCliVersionForModel({
-      runId: `codex-acp-envtest-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+      runId: `codex-acp-envtest-${Date.now()}-${secureRandom().toString(16).slice(2)}`,
       model: asString(config.model, ""),
       command: "codex",
       target,

@@ -41,21 +41,23 @@ Docker note: the Docker quickstart image also uses embedded PostgreSQL by defaul
 For a full PostgreSQL server locally, use the included Docker Compose setup:
 
 ```sh
-docker compose up -d
+export POSTGRES_PASSWORD=$(openssl rand -hex 24)
+docker run -d --name paperclip-db -e POSTGRES_USER=paperclip -e POSTGRES_PASSWORD -e POSTGRES_DB=paperclip \
+  -p 127.0.0.1:5432:5432 postgres:17-alpine
 ```
 
-This starts PostgreSQL 17 on `localhost:5432`. Then set the connection string:
+This starts PostgreSQL 17 on `127.0.0.1:5432` with a password you generated; there is no default password. The `docker/docker-compose.yml` stack keeps its database on the internal compose network and does not publish the port. Then set the connection string:
 
 ```sh
 cp .env.example .env
-# .env already contains:
-# DATABASE_URL=postgres://paperclip:paperclip@localhost:5432/paperclip
+# then set DATABASE_URL in .env (use the password generated above):
+# DATABASE_URL=postgres://paperclip:<password>@localhost:5432/paperclip
 ```
 
 Run migrations:
 
 ```sh
-DATABASE_URL=postgres://paperclip:paperclip@localhost:5432/paperclip \
+DATABASE_URL=postgres://paperclip:<password>@localhost:5432/paperclip \
   pnpm db:migrate
 ```
 
