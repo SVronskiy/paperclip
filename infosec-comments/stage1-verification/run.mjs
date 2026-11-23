@@ -282,12 +282,21 @@ check("E1-4", "passwords.docs", "No default database password in .env.example, d
   return result.stdout.trim() === "" ? pass("none found") : fail(result.stdout.trim());
 });
 
+check("E1-4", "database.guard", "PAPERCLIP_REQUIRE_EXTERNAL_DATABASE makes startup refuse the embedded development database", () =>
+  vitest("server", ["src/__tests__/external-database-requirement.test.ts"]));
+
+check("E1-5", "shim.tests", "The Go agent shim rejects unsafe commands (go test)", () => {
+  if (run("go", ["version"]).status !== 0) return skip("go is not installed");
+  const result = run("go", ["test", "./..."], { cwd: path.join(repo, "tools/agent-shim") });
+  return result.status === 0 ? pass(tail(result.stdout, 2)) : fail(tail(result.stdout + result.stderr));
+});
+
 check("E1-4", "passwords.embedded", "The embedded development database no longer uses the fixed paperclip/paperclip credentials", () => {
   const result = run("git", ["grep", "-lE", "paperclip:paperclip@|password: *\"paperclip\"", "--", "server/src", "cli/src", "packages/db/src", "packages/db/scripts", "scripts", ":!**/*.test.*", ":!**/__tests__/**"], { cwd: repo });
   const files = result.stdout.trim().split("\n").filter(Boolean);
   return files.length === 0
     ? pass("no fixed credentials left")
-    : open(`${files.length} file(s) still build the embedded-database connection with the fixed password (127.0.0.1 only; random password at initialization is still to do): ${files.join(", ")}`);
+    : open(`${files.length} file(s) still build the embedded-database connection with the fixed password. The embedded database is for local development only (127.0.0.1) and the pilot must set PAPERCLIP_REQUIRE_EXTERNAL_DATABASE=1 and use an external PostgreSQL. A random password would not stop an agent running as the same OS user, which can read the password file, so closing the agent-isolation items comes first: ${files.join(", ")}`);
 });
 
 // ------------------------------------------------------------- E1-5 .. E1-9

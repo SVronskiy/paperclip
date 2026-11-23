@@ -1,0 +1,24 @@
+tool     rule                                                                   before  after
+Horusec  No use weak random number generator                                        74      2
+Semgrep  spawn-shell-true                                                           12      0
+Horusec  Redirect to unknown path                                                   22     13
+Horusec  No use MD5 hashing                                                         12      6
+Semgrep  express_open_redirect                                                      10      7
+Semgrep  useless-ternary                                                            30     27
+Semgrep  node_secret                                                               160    158
+Horusec  Statically serving hidden files is security-sensitive                       1      0
+Horusec  Using shell interpreter when executing OS commands                         89     88
+Semgrep  express_xss                                                                 3      2
+Semgrep  gcm-no-tag-length                                                          10      9
+Semgrep  missing-user                                                                2      1
+Semgrep  node_api_key                                                               13     12
+Horusec  Origins should be verified during cross-origin communications             112    112
+Horusec  Using command line arguments                                               59     59
+Semgrep  detect-insecure-websocket                                                  17     17
+Semgrep  eval_nodejs                                                                12     12
+Semgrep  generic_header_injection                                                    5      5
+Semgrep  node_logic_bypass                                                           5      5
+Semgrep  node_password                                                               5      5
+Semgrep  open-never-closed                                                           9      9
+Horusec  Alert statements should not be used                                       270    271
+TOTAL 963 851

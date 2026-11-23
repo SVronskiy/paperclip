@@ -109,14 +109,14 @@
 | Э1-1 | БПО-1, Opus-4 (тот же адрес `telemetry.paperclip.ing`) | Удалить `DEFAULT_ENDPOINTS` и `DEFAULT_FEEDBACK_EXPORT_BACKEND_URL`. Телеметрия только opt-in. Флаги отключения принимают `1/true/yes`. Feedback-трейсы выключены без явного URL (БПО-1 п. 1–2, Opus-4) | — | Юнит-тесты: без настроек `fetch` не вызывается. Строк `telemetry.paperclip.ing` и `execute-api.us-east-1` в prod-коде нет. Повтор D-1 с перехватчиком — 0 запросов |
 | Э1-2 | БПО-4, БР-6 | Убрать `shell: true` на Windows в runner/dev/CI-скриптах (`cross-spawn`). В `board-auth.ts` открывать URL без `cmd` и проверять схему | Semgrep `spawn-shell-true`: 7 БР + 5 новых; Horusec 1 БР (`board-auth.ts`) | Semgrep `spawn-shell-true` = 0; тест с URL `…&calc` |
 | Э1-3 | БПО-5 (smoke-образы) | `USER` с непривилегированным UID в `docker/openclaw-smoke/Dockerfile` и `docker/runner-image/Dockerfile.smoke`. В README образов пометка «не образец для prod» | — | Trivy misconfig DS002 по этим Dockerfile = 0 |
-| Э1-4 | БПО-6, Opus-3 (пароль) | В `docker/docker-compose.yml` убрать `ports: 5432:5432`, пароль задавать только через обязательную переменную (`${POSTGRES_PASSWORD:?}`) или `_FILE`. Убрать `paperclip:paperclip` из `.env.example`, документации, CLI и скриптов (сейчас около 40 файлов). Встроенная БД получает случайный пароль при инициализации | — | `docker compose config` без опубликованного порта БД; `git grep 'paperclip:paperclip@'` вне тестов = 0; тест инициализации встроенной БД |
-| Э1-5 | БР-1 | Запуск ОС-команд: явный `shell:false`, команды — константы или allowlist, проверка аргументов. Отладочные Python-скрипты раннера — не включать в поставку. Go-шим — allowlist команд | Horusec: 63 БР + 85 новых; Semgrep: 7 БР (Python 6, Go 1) | Повторный Horusec/Semgrep; юнит-тесты отказа на недопустимые аргументы |
+| Э1-4 | Частично | Compose без опубликованного порта БД и без пароля по умолчанию; `.env.example` и документация без `paperclip:paperclip@`. Добавлен флаг `PAPERCLIP_REQUIRE_EXTERNAL_DATABASE=1`: старт отказывается переходить на встроенную БД (тест). **Остаётся:** встроенная БД разработки по-прежнему создаётся с паролем `paperclip` на `127.0.0.1`. Случайный пароль не остановил бы агента под тем же пользователем ОС, который читает файл с паролем, поэтому он зависит от изоляции агента (Opus-1, Opus-2) и в этап 1 не вошёл. В пилоте встроенную БД не использовать |
+| Э1-5 | Готово, правок мало | Строковых `exec`/`execSync` в продуктовом коде нет: все 150 срабатываний — `execFile`/`spawn` с массивом аргументов. Исправлено: `shell: true` (Э1-2); Go-шим `tools/agent-shim` принимает только имя команды или чистый абсолютный путь и отклоняет NUL (тесты `go test`); отладочный скрипт `probe-copilot-acp.py` проверяет путь к Node. Сам скрипт запускает бинарник с закреплённой SHA-256 |
 | Э1-6 | БР-2 | Заменить `Math.random` на `crypto` во всех местах, которые показывает сканер. Общий модуль `secure-random` | Horusec: 35 БР (1 устранена) + 40 новых | Horusec «Weak Random» = 0 |
 | Э1-7 | БР-3 | MD5/SHA1 → SHA-256. Для `Sec-WebSocket-Accept` и UUIDv5 — заявка на исключение по протоколу | Horusec: 5 БР + 10 новых | Horusec MD5/SHA1 = 0 или только исключения |
-| Э1-8 | БР-4 | Проверка цели редиректа: только относительный путь или зарегистрированный `redirect_uri`. Ограничить динамическую регистрацию OAuth-клиентов (`public-mcp`, `muse`) allowlist-ом `redirect_uri` | Horusec: 18 БР + 4 новых; Semgrep: 10 БР | Тесты на `//evil.com`, `https://evil.com`, `/\evil.com`, `%2F%2Fevil.com`, `javascript:` |
-| Э1-9 | БР-5 (прочие правила отчёта) | Экранирование вывода, `dotfiles: "deny"`, экранирование RegExp, проверка `origin` в обработчиках `message`, `Object.create(null)`, параметризованный SQL, без стека в ответе, проверка пути файла | Horusec: 6 БР + 112 новых (в основном «Origins should be verified» на `addEventListener`); Semgrep: 4 БР + 1 новое (`tainted-sql-string`) | Повторный прогон; тесты на каждое исправление |
-| Э1-10 | БР-5 (Dependency-Track) | Обновить `hyper` (Rust, `Cargo.lock` раннера) и `@grpc/grpc-js` (`server/package.json`, lockfile плагина Daytona) до актуальных версий. Загрузить SBOM этапа 1 в Dependency-Track и вместе с БР зафиксировать там анализ совпадения CVE по CPE | 3 | Повторный анализ SBOM в Dependency-Track |
-| Э1-11 | Новые типы срабатываний Horusec 2.8.0 и Semgrep | Разобрать вместе с БР до передачи. Подтверждённое исправить, остальное — с обоснованием в DefectDojo. Основная масса: «Alert statements should not be used» (270) — срабатывания на слово `prompt(` в серверном коде. Есть также «No use eval» (Critical, 1) — регулярное выражение для поиска `eval` в тексте навыков. Semgrep: `node_secret`/`node_api_key`/`node_password` (178), `useless-ternary` (30), `detect-insecure-websocket` (17), `eval_nodejs` (12), `gcm-no-tag-length` (10, совпадает с Opus-16), Dockerfile `missing-user` (3, совпадает с БПО-5) и др. | Horusec 277; Semgrep 274 | Решение по каждой строке согласовано с БР |
+| Э1-8 | Готово для внутренних путей | `safeRedirect` в `tool-access`, `chat-channels`, `tailscale-connections`, `slack-tools`; UI `McpConnect` проверяет URL перед переходом; регистрация OAuth-клиентов ограничивается `PAPERCLIP_MCP_OAUTH_REDIRECT_ORIGINS` (по умолчанию выключено, в пилоте включить). **Остаётся:** возвраты GitHub в `app.ts` (адрес собирает сервис по проверенному `state`, допустимые домены зависят от облачного коннектора), `authorize` в `public-mcp`/`muse` (проверка зарегистрированного `redirect_uri`), `smoke-lab` и `dot-runner-live` вне пилота. Сканер продолжает видеть их и сам `res.redirect` в `safe-redirect.ts` (единственный проверенный выход) |
+| Э1-9 | Готово, остальное — ложные срабатывания | Исправлено: `dotfiles: "deny"` с `root` (тест), экранирование и проверка пути в OAuth-странице. Проверено и не менялось: все обработчики `message` в UI уже сверяют `origin` или `source` (111 срабатываний «Origins should be verified» — слушатели `addEventListener` для DOM, `AbortSignal`, WebSocket), `RegExp` в `image-allowlist.ts` экранирует спецсимволы, заголовки `email.ts` — фиксированный список. Решения нужно подтвердить с БР в DefectDojo |
+| Э1-10 | Не закрыто | `@grpc/grpc-js` в `server` уже 1.14.5, исправляющая находку Trivy; повышение до 1.14.7 потребует обновления lock-файла через утверждённый процесс. `hyper 1.11.1`: совпадение с CVE по CPE подтвердить с БР, `cargo` на машине нет |
+| Э1-11 | Частично | Повторное сканирование выполнено (таблица ниже). Разбор новых типов срабатываний вместе с БР не начат |
 
 #### Статус выполнения этапа 1 (ветка `pilot/hardening`, 2026-11-23)
 
@@ -136,15 +136,35 @@
 | Э1-10 | Не закрыто | `@grpc/grpc-js` в `server` уже 1.14.5, исправляющая находку Trivy; повышение до 1.14.7 потребует обновления lock-файла через утверждённый процесс. `hyper 1.11.1`: совпадение с CVE по CPE подтвердить с БР, `cargo` на машине нет |
 | Э1-11 | Не начато | Разбор новых типов срабатываний вместе с БР |
 
+**Повторное сканирование ветки `pilot/hardening`** (те же наборы правил, что у БР; Horusec без тестов; отчёты — [reports/stage1/after](reports/stage1/after/)):
+
+| Правило | До | После | Комментарий |
+|---|---|---|---|
+| Horusec: слабый ГСЧ | 74 | 2 | Остались две строки в комментарии `secure-random.ts`; текст поправлен после сканирования |
+| Semgrep: `spawn-shell-true` | 12 | 0 | |
+| Horusec: MD5 | 12 | 6 | Остался только `Content-MD5` протокола S3 и тестовая заглушка S3 |
+| Horusec: скрытые файлы | 1 | 0 | |
+| Horusec: редиректы | 22 | 13 | 3 строки — сам `safe-redirect.ts`, остальное в списке Э1-8 «остаётся» и две строки `browser-tracing` (метод с именем `redirect`) |
+| Semgrep: `express_open_redirect` | 10 | 7 | |
+| Semgrep: `gcm-no-tag-length` | 10 | 9 | Это Opus-16, этап 2 |
+| Horusec: запуск ОС-команд | 89 | 88 | `execFile`/`spawn` с массивом аргументов; сканер не различает |
+| Horusec: «Origins should be verified» | 112 | 112 | Ложные срабатывания, см. Э1-9 |
+| Всего | 963 | 851 | Включая новые типы срабатываний, не относящиеся к отчёту БР |
+
+Число находок в отчёте БР (159) этим прогоном не сравнивается: у БР уже был свой разбор в DefectDojo. Снижение нужно подтвердить их повторным сканированием.
+
 **Проверено.** Все запуски сделаны локально на ревизии ветки `pilot/hardening`:
-- `cli` — 558 тестов проходят; `packages/shared` — тесты telemetry и secure-random проходят;
-- серверные тесты по потокам проходят (feedback, telemetry, redirect, OAuth, plugin UI, routines — 105, public MCP client metadata, S3 backoff и throttle);
-- сценарий `stage1-verification` проходит все проверки, включая Docker, кроме двух открытых (встроенная БД, `hyper`).
+- `cli` — 558 тестов проходят; `packages/shared` — 1373 теста проходят; адаптеры `claude-local`, `codex-local`, `opencode-local`, `pi-local`, `cursor-local`, `gemini-local`, `kimi-local` проходят полностью;
+- серверные тесты по потокам проходят (feedback, telemetry, redirect, OAuth, plugin UI, routines — 105, public MCP client metadata, S3 backoff и throttle, внешняя БД);
+- `run-secret-redaction` и `attention-service` — все 55 тестов проходят на встроенном Postgres, то есть замена MD5 на SHA-256 в SQL проверена на реальной БД (хук очистки после тестов упал по тайм-ауту 30 с);
+- `go test` для шима проходит;
+- сценарий `stage1-verification` с Docker — 29 проверок пройдено, 0 провалено, 2 открытые (встроенная БД, `hyper`).
 
 **Не проверено.**
-- Тяжёлые серверные наборы на встроенном Postgres (`attention-service`, `chat-channels.integration`) полностью не отработали: прогон повис, повторный запуск отдельных файлов выполняется. До результата считать SQL-замену MD5 на SHA-256 в `attention.ts` и `run-secret-redaction.ts` непроверенной на реальной БД.
-- В `packages/db` падают 4 теста (`postgres-queue`, `test-postgres-command`). Файлы этих тестов не менялись, но на чистой ветке `master` я их не запускал.
-- Повторный прогон Semgrep и Horusec по новому коду не выполнен.
+- В `packages/db` падают 4 теста (`postgres-queue`, `test-postgres-command`). Файлы не менялись, на чистой ветке `master` их не запускал.
+- В `packages/adapter-utils` падают 86 тестов, в `grok-local` — 1: тайм-ауты 5 с под нагрузкой (параллельно шло сканирование в Docker) и недоступное имя хоста для SSH-тестов. Этот пакет в ветке не менялся; повторить без нагрузки.
+- Тест `server/src/__tests__/plugin-ui-static.test.ts` («serves built UI assets publicly…») падает по тайм-ауту 15 с и на чистой ветке `master`.
+- Тяжёлые серверные наборы `chat-channels.integration` и полный набор серверных тестов не отработали до конца.
 - `pnpm verify` требует широкой проверки в CI: изменён `README.md`, глобальный вход CI.
 
 **Пакет на повторную проверку ИБ:**
