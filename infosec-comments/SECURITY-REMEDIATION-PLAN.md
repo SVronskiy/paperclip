@@ -161,8 +161,8 @@
 - сценарий `stage1-verification` с Docker — 29 проверок пройдено, 0 провалено, 2 открытые (встроенная БД, `hyper`).
 
 **Не проверено.**
-- В `packages/db` падают 4 теста (`postgres-queue`, `test-postgres-command`). Файлы не менялись, на чистой ветке `master` их не запускал.
-- В `packages/adapter-utils` падают 86 тестов, в `grok-local` — 1: тайм-ауты 5 с под нагрузкой (параллельно шло сканирование в Docker) и недоступное имя хоста для SSH-тестов. Этот пакет в ветке не менялся; повторить без нагрузки.
+- `packages/db` (`postgres-queue`, `test-postgres-command`): при параллельной нагрузке (сканирование в Docker) падали по тайм-ауту, без нагрузки проходят и на `pilot/hardening`, и на `master`.
+- `packages/adapter-utils` (пакет в ветке не менялся): шесть файлов (`acpx-engine/execute`, `git-workspace-sync`, `github-launcher*`, `sandbox-managed-runtime`, `ssh-export-stream`) нестабильны на этой машине — на `master` падает 18 тестов, на `pilot/hardening` 9 (тайм-ауты и недоступное имя хоста для SSH). Регрессии нет, но чистый зелёный прогон должен дать CI.
 - Тест `server/src/__tests__/plugin-ui-static.test.ts` («serves built UI assets publicly…») падает по тайм-ауту 15 с и на чистой ветке `master`.
 - Тяжёлые серверные наборы `chat-channels.integration` и полный набор серверных тестов не отработали до конца.
 - `pnpm verify` требует широкой проверки в CI: изменён `README.md`, глобальный вход CI.
