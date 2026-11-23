@@ -6,6 +6,7 @@
 - `reports/` — сырые отчёты проверок, на которые ссылается план.
 - [br-findings-registry.csv](br-findings-registry.csv) — реестр 159 находок команды безопасной разработки (выгрузка DefectDojo: Semgrep, Horusec, Dependency-Track) с сопоставлением с текущей ревизией, пунктом плана, оценкой и действием. Исходные HTML-отчёты не включены: в них есть внутренние адреса.
 - [stage1-registry.csv](stage1-registry.csv) — реестр этапа 1 (967 строк): находки БР и всё, что те же сканеры (Semgrep с наборами правил БР, Horusec 2.8.0) выдают на текущей ревизии, с потоком этапа, происхождением и действием.
+- [stage1-verification/](stage1-verification/SCENARIO.md) — сценарий проверки этапа 1, который ИИ-агент выполняет сам: `node infosec-comments/stage1-verification/run.mjs --repo <каталог с кодом этапа 1> --with-docker`. Пишет отчёт в `stage1-verification/results/`.
 - `reports/stage1/` — сырые отчёты повторного прогона 2026-11-23 (`semgrep-br-rulesets.json`, `horusec.json` по каталогам), SBOM текущей ревизии для Dependency-Track (`sbom-cyclonedx.json`) и скрипты сопоставления (`compare.py`, `stage1.py`, `hs-run.sh`; входные данные — разобранная выгрузка DefectDojo, в репозиторий не включена). Контрольные суммы — `reports/stage1/SHA256SUMS`.
 
 Проверки выполнены 2026-11-19 по ревизии `master` @ `3dffb2c9d`.

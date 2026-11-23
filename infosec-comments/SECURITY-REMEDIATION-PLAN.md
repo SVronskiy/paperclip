@@ -118,6 +118,35 @@
 | Э1-10 | БР-5 (Dependency-Track) | Обновить `hyper` (Rust, `Cargo.lock` раннера) и `@grpc/grpc-js` (`server/package.json`, lockfile плагина Daytona) до актуальных версий. Загрузить SBOM этапа 1 в Dependency-Track и вместе с БР зафиксировать там анализ совпадения CVE по CPE | 3 | Повторный анализ SBOM в Dependency-Track |
 | Э1-11 | Новые типы срабатываний Horusec 2.8.0 и Semgrep | Разобрать вместе с БР до передачи. Подтверждённое исправить, остальное — с обоснованием в DefectDojo. Основная масса: «Alert statements should not be used» (270) — срабатывания на слово `prompt(` в серверном коде. Есть также «No use eval» (Critical, 1) — регулярное выражение для поиска `eval` в тексте навыков. Semgrep: `node_secret`/`node_api_key`/`node_password` (178), `useless-ternary` (30), `detect-insecure-websocket` (17), `eval_nodejs` (12), `gcm-no-tag-length` (10, совпадает с Opus-16), Dockerfile `missing-user` (3, совпадает с БПО-5) и др. | Horusec 277; Semgrep 274 | Решение по каждой строке согласовано с БР |
 
+#### Статус выполнения этапа 1 (ветка `pilot/hardening`, 2026-11-23)
+
+Код лежит в локальной ветке `pilot/hardening` от `master` (`3dffb2c9d`), в публичный форк не отправлен. Проверка выполняется сценарием [stage1-verification](stage1-verification/SCENARIO.md), который агент может запустить самостоятельно.
+
+| Поток | Состояние | Что сделано и что осталось |
+|---|---|---|
+| Э1-1 | Готово | `DEFAULT_ENDPOINTS` и адрес feedback удалены. Телеметрия только по явному включению (`PAPERCLIP_TELEMETRY_ENABLED` или `telemetry.enabled: true`). `1/true/yes/on` в флагах отключения. Без адреса сборщика события не отправляются. Выгрузка feedback выключена без `PAPERCLIP_FEEDBACK_EXPORT_BACKEND_URL`. Тесты и динамическая проба |
+| Э1-2 | Готово | `shell: true` убран во всех скриптах: общий запуск pnpm без shell (`scripts/lib/pnpm-invocation.mjs`). `cross-spawn` не добавлялся: изменение `pnpm-lock.yaml` проходит через отдельный процесс проверенного lock-файла (`tests/runner-e2e/report-lock.json`), который я не обхожу. `board-auth.ts` открывает URL через `rundll32` и проверяет схему |
+| Э1-3 | Готово для двух smoke-образов | `USER` задан в `docker/openclaw-smoke` и во всех стадиях `docker/runner-image/Dockerfile.smoke`; проверено сборкой и Trivy. Остались вне пилота и не менялись: `.github/docker-context-checks.Dockerfile` (CI-проба) и шаблон Cloudflare-плагина |
+| Э1-4 | Частично | Compose без опубликованного порта БД и без пароля по умолчанию; `.env.example` и документация без `paperclip:paperclip@`. **Остаётся:** случайный пароль встроенной БД при инициализации и перенос уже созданных кластеров (около 15 файлов собирают строку подключения) |
+| Э1-5 | Разобрано, правок мало | Строковых `exec`/`execSync` в продуктовом коде нет: все 150 срабатываний — `execFile`/`spawn` с массивом аргументов. Исправлено единственное реальное место (`shell: true`, Э1-2). **Остаётся:** валидация аргументов отладочного скрипта `probe-copilot-acp.py` и allowlist команд Go-шима `tools/agent-shim` |
+| Э1-6 | Готово | `Math.random` заменён во всём продуктовом коде и в скриптах: общий модуль `@paperclipai/shared/secure-random`, `node:crypto` там, где пакет не зависит от shared. Небезопасный запасной вариант в `ui/src/lib/uuid.ts` удалён. Базовая проверка `scripts/check-security-baseline.mjs` не пропускает возврат |
+| Э1-7 | Готово, кроме протокольных мест | MD5 заменён на SHA-256 (ETag, id wiki, отпечатки в SQL, ключ кэша контрактов). Остаются SHA-1 в `Sec-WebSocket-Accept` (2) и UUIDv5, MD5 в S3 `Content-MD5` — нужна заявка в службу ИБ. UUIDv5 через библиотеку `uuid` не переводился из-за lock-файла: идентификаторы не менялись, вывод проверен на совпадение |
+| Э1-8 | Готово для внутренних путей | `safeRedirect` в `tool-access`, `chat-channels`, `tailscale-connections`, `slack-tools`; UI `McpConnect` проверяет URL перед переходом; регистрация OAuth-клиентов ограничивается `PAPERCLIP_MCP_OAUTH_REDIRECT_ORIGINS` (по умолчанию выключено, в пилоте включить). **Остаётся:** возвраты GitHub в `app.ts` и `authorize` в `public-mcp`/`muse` (цель проверяется внутри сервиса по зарегистрированному `redirect_uri`) |
+| Э1-9 | Частично | Готово: `dotfiles: "deny"` с `root` (тест), экранирование и проверка пути в OAuth-странице. Не менялось как ложные срабатывания: `RegExp` в `image-allowlist.ts` уже экранирует спецсимволы, заголовки `email.ts` — фиксированный список, `environments.ts`/`summary-slots.ts`. **Остаётся:** разбор 111 слушателей «Origins should be verified» (в основном `addEventListener` для DOM и `AbortSignal`) |
+| Э1-10 | Не закрыто | `@grpc/grpc-js` в `server` уже 1.14.5, исправляющая находку Trivy; повышение до 1.14.7 потребует обновления lock-файла через утверждённый процесс. `hyper 1.11.1`: совпадение с CVE по CPE подтвердить с БР, `cargo` на машине нет |
+| Э1-11 | Не начато | Разбор новых типов срабатываний вместе с БР |
+
+**Проверено.** Все запуски сделаны локально на ревизии ветки `pilot/hardening`:
+- `cli` — 558 тестов проходят; `packages/shared` — тесты telemetry и secure-random проходят;
+- серверные тесты по потокам проходят (feedback, telemetry, redirect, OAuth, plugin UI, routines — 105, public MCP client metadata, S3 backoff и throttle);
+- сценарий `stage1-verification` проходит все проверки, включая Docker, кроме двух открытых (встроенная БД, `hyper`).
+
+**Не проверено.**
+- Тяжёлые серверные наборы на встроенном Postgres (`attention-service`, `chat-channels.integration`) полностью не отработали: прогон повис, повторный запуск отдельных файлов выполняется. До результата считать SQL-замену MD5 на SHA-256 в `attention.ts` и `run-secret-redaction.ts` непроверенной на реальной БД.
+- В `packages/db` падают 4 теста (`postgres-queue`, `test-postgres-command`). Файлы этих тестов не менялись, но на чистой ветке `master` я их не запускал.
+- Повторный прогон Semgrep и Horusec по новому коду не выполнен.
+- `pnpm verify` требует широкой проверки в CI: изменён `README.md`, глобальный вход CI.
+
 **Пакет на повторную проверку ИБ:**
 
 1. Коммит ветки `pilot/hardening` и его хеш.
