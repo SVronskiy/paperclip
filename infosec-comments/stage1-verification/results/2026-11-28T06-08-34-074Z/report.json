@@ -1,0 +1,370 @@
+{
+  "generatedAt": "2026-11-28T06:14:41.120Z",
+  "repo": "/Users/mac/repos/paperclip",
+  "commit": "e51e77b63db0929a97b8a2578381595f1b795d3d",
+  "options": {
+    "withDocker": true,
+    "withScanners": false,
+    "only": "all"
+  },
+  "summary": {
+    "PASS": 41,
+    "FAIL": 0,
+    "OPEN": 0,
+    "SKIP": 1,
+    "INFO": 2
+  },
+  "results": [
+    {
+      "stream": "E1-0",
+      "id": "preflight.repo",
+      "title": "The repository is the stage 1 branch with its dependencies installed",
+      "status": "INFO",
+      "detail": "branch pilot/hardening at 1a80e2963",
+      "seconds": 0
+    },
+    {
+      "stream": "E1-1",
+      "id": "telemetry.static",
+      "title": "No built-in telemetry collector address in product code",
+      "status": "PASS",
+      "detail": "no telemetry.paperclip.ing or execute-api.us-east-1 address",
+      "seconds": 2
+    },
+    {
+      "stream": "E1-1",
+      "id": "telemetry.config",
+      "title": "Telemetry is opt-in and every opt-out spelling wins",
+      "status": "PASS",
+      "detail": "default off; opt-in works; 1/true/yes/on opt-outs win",
+      "seconds": 0
+    },
+    {
+      "stream": "E1-1",
+      "id": "telemetry.network",
+      "title": "A client with default settings, and one with DO_NOT_TRACK=true, make no network request",
+      "status": "PASS",
+      "detail": "0 requests without an operator endpoint; DO_NOT_TRACK=true disables telemetry",
+      "seconds": 0
+    },
+    {
+      "stream": "E1-1",
+      "id": "feedback.disabled",
+      "title": "Feedback trace export is disabled without an explicit backend URL",
+      "status": "PASS",
+      "detail": "no client is created without PAPERCLIP_FEEDBACK_EXPORT_BACKEND_URL",
+      "seconds": 0
+    },
+    {
+      "stream": "E1-1",
+      "id": "telemetry.tests",
+      "title": "Telemetry and feedback unit tests pass",
+      "status": "PASS",
+      "detail": " Test Files 3 passed (3) | Tests 18 passed (18) /  Test Files 7 passed (7) | Tests 51 passed (51)",
+      "seconds": 6
+    },
+    {
+      "stream": "E1-2",
+      "id": "shell.static",
+      "title": "No spawn with a shell (shell: true or a platform-dependent shell flag) in product code and scripts",
+      "status": "PASS",
+      "detail": "no shell spawning found",
+      "seconds": 2
+    },
+    {
+      "stream": "E1-2",
+      "id": "shell.helper",
+      "title": "The pnpm launcher passes shell metacharacters as one literal argument",
+      "status": "PASS",
+      "detail": "ℹ pass 4 ℹ fail 0",
+      "seconds": 0
+    },
+    {
+      "stream": "E1-2",
+      "id": "boardauth.windows",
+      "title": "The CLI opens approval URLs on Windows without cmd and rejects command-injection URLs",
+      "status": "PASS",
+      "detail": "rundll32 url.dll,FileProtocolHandler; 6 unsafe URL forms rejected",
+      "seconds": 0
+    },
+    {
+      "stream": "E1-2",
+      "id": "boardauth.tests",
+      "title": "CLI board-auth tests pass",
+      "status": "PASS",
+      "detail": " Test Files 1 passed (1) | Tests 23 passed (23)",
+      "seconds": 2
+    },
+    {
+      "stream": "E1-3",
+      "id": "images.static",
+      "title": "Every stage of the smoke Dockerfiles sets a non-root USER",
+      "status": "PASS",
+      "detail": "both smoke Dockerfiles run unprivileged in every stage",
+      "seconds": 0
+    },
+    {
+      "stream": "E1-3",
+      "id": "images.trivy",
+      "title": "Trivy reports no DS002 (root user) finding for the two smoke Dockerfiles",
+      "status": "PASS",
+      "detail": "no DS002",
+      "seconds": 4
+    },
+    {
+      "stream": "E1-3",
+      "id": "images.build",
+      "title": "The openclaw smoke image builds and runs as a non-root user",
+      "status": "PASS",
+      "detail": "runs as uid 1000",
+      "seconds": 3
+    },
+    {
+      "stream": "E1-4",
+      "id": "compose.static",
+      "title": "docker-compose.yml publishes no database port and has no default database password",
+      "status": "PASS",
+      "detail": "no published port; POSTGRES_PASSWORD is required",
+      "seconds": 0
+    },
+    {
+      "stream": "E1-4",
+      "id": "compose.config",
+      "title": "docker compose refuses to render without POSTGRES_PASSWORD and renders without ports with it",
+      "status": "PASS",
+      "detail": "ℹ pass 3 ℹ fail 0",
+      "seconds": 1
+    },
+    {
+      "stream": "E1-4",
+      "id": "passwords.docs",
+      "title": "No default database password in .env.example, docs and CLI help",
+      "status": "PASS",
+      "detail": "none found",
+      "seconds": 0
+    },
+    {
+      "stream": "E1-4",
+      "id": "database.guard",
+      "title": "PAPERCLIP_REQUIRE_EXTERNAL_DATABASE makes startup refuse the embedded development database",
+      "status": "PASS",
+      "detail": " Test Files 1 passed (1) | Tests 7 passed (7)",
+      "seconds": 5
+    },
+    {
+      "stream": "E1-5",
+      "id": "shim.tests",
+      "title": "The Go agent shim rejects unsafe commands (go test)",
+      "status": "PASS",
+      "detail": "ok  \tgithub.com/paperclipai/paperclip/tools/agent-shim\t(cached)",
+      "seconds": 2
+    },
+    {
+      "stream": "E1-4",
+      "id": "passwords.embedded",
+      "title": "The embedded database uses a random per-instance password (no fixed paperclip/paperclip in product code)",
+      "status": "PASS",
+      "detail": " Test Files 1 passed (1) | Tests 4 passed (4)",
+      "seconds": 3
+    },
+    {
+      "stream": "E1-4",
+      "id": "app.smoke",
+      "title": "The real server starts on a fresh and on a legacy embedded database, serves the API, and moves the legacy password",
+      "status": "PASS",
+      "detail": "ok: fresh start reaches /api/health (status starting); ok: database password is random and stored with mode 0600 (mode 600, 48 chars); ok: an API route backed by the database answers (GET /api/companies -> 200); ok: the old fixed password is rejected (connect as paperclip/paperclip); ok: the stored password is accepted; ok: a legacy cluster (old password, no password file) starts; ok: the legacy cluster is moved to a random password; ok: the upgraded password works and the old one no longer does; ok: a restart reuses the stored password",
+      "seconds": 107
+    },
+    {
+      "stream": "E1-5",
+      "id": "baseline",
+      "title": "Security baseline: no Math.random, MD5/SHA-1 (outside documented protocol uses), shell spawning or built-in telemetry address",
+      "status": "PASS",
+      "detail": "security baseline: ok",
+      "seconds": 3
+    },
+    {
+      "stream": "E1-5",
+      "id": "baseline.tests",
+      "title": "The baseline check has tests and they pass",
+      "status": "PASS",
+      "detail": "ℹ pass 6 ℹ fail 0",
+      "seconds": 2
+    },
+    {
+      "stream": "E1-6",
+      "id": "random.module",
+      "title": "secure-random helpers never use Math.random and stay in range",
+      "status": "PASS",
+      "detail": " Test Files 1 passed (1) | Tests 7 passed (7)",
+      "seconds": 1
+    },
+    {
+      "stream": "E1-6",
+      "id": "random.ui",
+      "title": "UI tests that depended on Math.random pass with crypto-backed randomness",
+      "status": "PASS",
+      "detail": " Test Files 3 passed (3) | Tests 40 passed (40)",
+      "seconds": 8
+    },
+    {
+      "stream": "E1-6",
+      "id": "random.server",
+      "title": "Server retry/backoff tests that depended on Math.random pass",
+      "status": "PASS",
+      "detail": " Test Files 2 passed (2) | Tests 6 passed (6)",
+      "seconds": 5
+    },
+    {
+      "stream": "E1-7",
+      "id": "hash.sha256",
+      "title": "Hash replacements: ETag, redaction version and attention content use SHA-256",
+      "status": "PASS",
+      "detail": "MD5 replaced by SHA-256 in the three server places",
+      "seconds": 0
+    },
+    {
+      "stream": "E1-7",
+      "id": "hash.exceptions",
+      "title": "Remaining SHA-1/MD5 uses are exactly the documented protocol exceptions",
+      "status": "INFO",
+      "detail": "1 protocol-mandated use(s): WebSocket accept x2, UUIDv5 x1, S3 Content-MD5 benchmark fake x1. A security-service exception request is still needed.",
+      "seconds": 0
+    },
+    {
+      "stream": "E1-8",
+      "id": "redirect.tests",
+      "title": "Redirect, OAuth-return and registration tests pass",
+      "status": "PASS",
+      "detail": " Test Files 3 passed (3) | Tests 56 passed (56) /  Test Files 1 passed (1) | Tests 16 passed (16)",
+      "seconds": 8
+    },
+    {
+      "stream": "E1-8",
+      "id": "redirect.probe",
+      "title": "Open-redirect payloads never reach res.redirect",
+      "status": "PASS",
+      "detail": "8 payloads all replaced by the fallback",
+      "seconds": 1
+    },
+    {
+      "stream": "E1-8",
+      "id": "redirect.coverage",
+      "title": "res.redirect appears only inside safe-redirect.ts across server routes and app.ts",
+      "status": "PASS",
+      "detail": "every redirect goes through safeRedirect or redirectToValidatedLocation",
+      "seconds": 0
+    },
+    {
+      "stream": "E1-8",
+      "id": "redirect.validated",
+      "title": "redirectToValidatedLocation blocks javascript:, data:, //host, plain http and credentials",
+      "status": "PASS",
+      "detail": " Test Files 1 passed (1) | Tests 29 passed (29)",
+      "seconds": 2
+    },
+    {
+      "stream": "E1-11",
+      "id": "crypto.gcm",
+      "title": "Every AES-GCM decryption fixes the authentication tag length",
+      "status": "PASS",
+      "detail": "12 files, all GCM decipher calls pin authTagLength",
+      "seconds": 1
+    },
+    {
+      "stream": "E1-11",
+      "id": "ws.plaintext",
+      "title": "Plaintext ws:// is refused toward public hosts and still works on loopback, private and tailnet hosts",
+      "status": "PASS",
+      "detail": " Test Files 1 passed (1) | Tests 20 passed (20)",
+      "seconds": 2
+    },
+    {
+      "stream": "E1-11",
+      "id": "app.adapters",
+      "title": "Gateway adapter, announcements and secret-encryption suites still pass",
+      "status": "PASS",
+      "detail": " Test Files 6 passed (6) | Tests 140 passed (140)",
+      "seconds": 91
+    },
+    {
+      "stream": "E1-9",
+      "id": "plugin-ui.dotfiles",
+      "title": "Plugin UI static route denies hidden files and keeps dot-directory installs working",
+      "status": "PASS",
+      "detail": " Test Files 1 passed (1) | Tests 8 passed (8)",
+      "seconds": 25
+    },
+    {
+      "stream": "E1-12",
+      "id": "r2.postmessage",
+      "title": "MCP Apps: no wildcard postMessage target; host talks to the view only through the guard's port",
+      "status": "PASS",
+      "detail": " Test Files 2 passed (2) | Tests 22 passed (22)",
+      "seconds": 5
+    },
+    {
+      "stream": "E1-12",
+      "id": "r2.render-path",
+      "title": "Request paths echoed into HTML (Vite render, OAuth interstitial) are same-origin paths only",
+      "status": "PASS",
+      "detail": " Test Files 2 passed (2) | Tests 17 passed (17)",
+      "seconds": 3
+    },
+    {
+      "stream": "E1-12",
+      "id": "r2.traversal",
+      "title": "Agent instruction routes refuse traversal paths before any file service runs",
+      "status": "PASS",
+      "detail": " Test Files 1 passed (1) | Tests 32 passed (32)",
+      "seconds": 27
+    },
+    {
+      "stream": "E1-12",
+      "id": "r2.selectors",
+      "title": "Summary slot routes parse scope and slot against fixed enums; webhook headers are read by literal name",
+      "status": "PASS",
+      "detail": " Test Files 2 passed (2) | Tests 15 passed (15)",
+      "seconds": 39
+    },
+    {
+      "stream": "E1-12",
+      "id": "r2.vex",
+      "title": "VEX records the hyper and grpc-js false matches and covers every locked version",
+      "status": "PASS",
+      "detail": "vex: ok (2 analysed findings); ℹ pass 3 ℹ fail 0",
+      "seconds": 0
+    },
+    {
+      "stream": "E1-10",
+      "id": "deps.grpc",
+      "title": "@grpc/grpc-js is at or above 1.14.5 (the version that fixes the Trivy finding)",
+      "status": "PASS",
+      "detail": "pnpm-lock.yaml: 1.14.5, 1.14.5",
+      "seconds": 0
+    },
+    {
+      "stream": "E1-10",
+      "id": "deps.hyper",
+      "title": "hyper in the Rust runner lockfile: false CPE match, recorded in security/vex.cdx.json",
+      "status": "PASS",
+      "detail": "hyper 1.11.1: CVE-2024-23741 is Vercel's Hyper terminal; VEX not_affected/code_not_present",
+      "seconds": 0
+    },
+    {
+      "stream": "E1-10",
+      "id": "deps.lockfile.gate",
+      "title": "Dependency changes in this branch respect the reviewed-lockfile gate",
+      "status": "PASS",
+      "detail": "pnpm-lock.yaml is unchanged from master, so the reviewed-lock gate is untouched",
+      "seconds": 0
+    },
+    {
+      "stream": "E1-11",
+      "id": "scanners.horusec",
+      "title": "Horusec re-run: weak random and MD5 findings are gone",
+      "status": "SKIP",
+      "detail": "use --with-scanners"
+    }
+  ]
+}

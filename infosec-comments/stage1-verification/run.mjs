@@ -391,6 +391,33 @@ check("E1-11", "app.adapters", "Gateway adapter, announcements and secret-encryp
 
 check("E1-9", "plugin-ui.dotfiles", "Plugin UI static route denies hidden files and keeps dot-directory installs working", () => vitest("server", ["src/__tests__/plugin-ui-static.test.ts"]));
 
+// ------------------------------------------------- E1-12: second review (2026-11-26)
+check("E1-12", "r2.postmessage", "MCP Apps: no wildcard postMessage target; host talks to the view only through the guard's port", () => {
+  const files = ["ui/src/components/mcp-app/McpAppFrame.tsx", "ui/src/components/mcp-app/mcp-app-host.ts"];
+  const bad = files.filter((f) => /postMessage\([^)]*,\s*["']\*["']/.test(read(f)));
+  if (bad.length) return fail(`wildcard postMessage in ${bad.join(", ")}`);
+  return vitest("ui", ["src/components/mcp-app/mcp-app-host.test.ts", "src/components/mcp-app/McpAppFrame.test.tsx"]);
+});
+
+check("E1-12", "r2.render-path", "Request paths echoed into HTML (Vite render, OAuth interstitial) are same-origin paths only", () => {
+  const raw = run("git", ["grep", "-nE", "render\\(req\\.originalUrl|Html\\(req\\.originalUrl", "--", "server/src", ":!**/*.test.*"], { cwd: repo }).stdout.trim();
+  if (raw) return fail(`raw request URL still rendered: ${raw}`);
+  return vitest("server", ["src/__tests__/request-path.test.ts", "src/__tests__/oauth-browser-return.test.ts"]);
+});
+
+check("E1-12", "r2.traversal", "Agent instruction routes refuse traversal paths before any file service runs", () =>
+  vitest("server", ["src/__tests__/agent-instructions-routes.test.ts"]));
+
+check("E1-12", "r2.selectors", "Summary slot routes parse scope and slot against fixed enums; webhook headers are read by literal name", () =>
+  vitest("server", ["src/__tests__/summary-slot-routes.test.ts", "src/__tests__/email-webhook-headers.test.ts"]));
+
+check("E1-12", "r2.vex", "VEX records the hyper and grpc-js false matches and covers every locked version", () => {
+  const result = run("node", ["scripts/check-vex.mjs"], { cwd: repo });
+  if (result.status !== 0) return fail(tail(result.stdout + result.stderr));
+  const tests = nodeTest(["scripts/check-vex.test.mjs"]);
+  return tests.status === "FAIL" ? tests : pass(`${result.stdout.trim()}; ${tests.detail ?? ""}`);
+});
+
 // ------------------------------------------------------------------ E1-10
 check("E1-10", "deps.grpc", "@grpc/grpc-js is at or above 1.14.5 (the version that fixes the Trivy finding)", () => {
   const lock = read("pnpm-lock.yaml");
@@ -400,10 +427,13 @@ check("E1-10", "deps.grpc", "@grpc/grpc-js is at or above 1.14.5 (the version th
   return older.length ? fail(`older versions in pnpm-lock.yaml: ${older.join(", ")}`) : pass(`pnpm-lock.yaml: ${versions.join(", ")}`);
 });
 
-check("E1-10", "deps.hyper", "hyper in the Rust runner lockfile (Dependency-Track critical finding)", () => {
+check("E1-10", "deps.hyper", "hyper in the Rust runner lockfile: false CPE match, recorded in security/vex.cdx.json", () => {
   const lock = read("packages/paperclip-runner/runner/Cargo.lock");
   const version = /name = "hyper"\nversion = "([^"]+)"/.exec(lock)?.[1];
-  return open(`hyper ${version} is still locked. CVE-2024-23741 describes the Hyper terminal for macOS, not the Rust crate, so this looks like a false match by CPE; confirm with the secure-development team and record the analysis in Dependency-Track. The SBOM for it is infosec-comments/reports/stage1/sbom-cyclonedx.json.`);
+  const vex = JSON.parse(read("security/vex.cdx.json"));
+  const entry = vex.vulnerabilities.find((v) => v.id === "CVE-2024-23741");
+  const covered = entry?.affects.some((a) => a.ref === `pkg:cargo/hyper@${version}`);
+  return covered ? pass(`hyper ${version}: CVE-2024-23741 is Vercel's Hyper terminal; VEX not_affected/code_not_present`) : fail(`hyper ${version} is not covered by the VEX entry`);
 });
 
 check("E1-10", "deps.lockfile.gate", "Dependency changes in this branch respect the reviewed-lockfile gate", () => {

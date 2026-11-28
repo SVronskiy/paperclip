@@ -1,0 +1,86 @@
+{
+  "generatedAt": "2026-11-28T06:08:25.796Z",
+  "repo": "/Users/mac/repos/paperclip",
+  "commit": "1a80e2963df4a27e64e7230c84e154364b490541",
+  "options": {
+    "withDocker": false,
+    "withScanners": false,
+    "only": [
+      "E1-12",
+      "E1-10"
+    ]
+  },
+  "summary": {
+    "PASS": 8,
+    "FAIL": 0,
+    "OPEN": 0,
+    "SKIP": 0,
+    "INFO": 0
+  },
+  "results": [
+    {
+      "stream": "E1-12",
+      "id": "r2.postmessage",
+      "title": "MCP Apps: no wildcard postMessage target; host talks to the view only through the guard's port",
+      "status": "PASS",
+      "detail": " Test Files 2 passed (2) | Tests 22 passed (22)",
+      "seconds": 6
+    },
+    {
+      "stream": "E1-12",
+      "id": "r2.render-path",
+      "title": "Request paths echoed into HTML (Vite render, OAuth interstitial) are same-origin paths only",
+      "status": "PASS",
+      "detail": " Test Files 2 passed (2) | Tests 17 passed (17)",
+      "seconds": 4
+    },
+    {
+      "stream": "E1-12",
+      "id": "r2.traversal",
+      "title": "Agent instruction routes refuse traversal paths before any file service runs",
+      "status": "PASS",
+      "detail": " Test Files 1 passed (1) | Tests 32 passed (32)",
+      "seconds": 28
+    },
+    {
+      "stream": "E1-12",
+      "id": "r2.selectors",
+      "title": "Summary slot routes parse scope and slot against fixed enums; webhook headers are read by literal name",
+      "status": "PASS",
+      "detail": " Test Files 2 passed (2) | Tests 15 passed (15)",
+      "seconds": 40
+    },
+    {
+      "stream": "E1-12",
+      "id": "r2.vex",
+      "title": "VEX records the hyper and grpc-js false matches and covers every locked version",
+      "status": "PASS",
+      "detail": "vex: ok (2 analysed findings); ℹ pass 3 ℹ fail 0",
+      "seconds": 0
+    },
+    {
+      "stream": "E1-10",
+      "id": "deps.grpc",
+      "title": "@grpc/grpc-js is at or above 1.14.5 (the version that fixes the Trivy finding)",
+      "status": "PASS",
+      "detail": "pnpm-lock.yaml: 1.14.5, 1.14.5",
+      "seconds": 0
+    },
+    {
+      "stream": "E1-10",
+      "id": "deps.hyper",
+      "title": "hyper in the Rust runner lockfile: false CPE match, recorded in security/vex.cdx.json",
+      "status": "PASS",
+      "detail": "hyper 1.11.1: CVE-2024-23741 is Vercel's Hyper terminal; VEX not_affected/code_not_present",
+      "seconds": 0
+    },
+    {
+      "stream": "E1-10",
+      "id": "deps.lockfile.gate",
+      "title": "Dependency changes in this branch respect the reviewed-lockfile gate",
+      "status": "PASS",
+      "detail": "pnpm-lock.yaml is unchanged from master, so the reviewed-lock gate is untouched",
+      "seconds": 0
+    }
+  ]
+}

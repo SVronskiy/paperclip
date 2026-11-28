@@ -120,7 +120,7 @@
 
 #### Статус выполнения этапа 1 (ветка `pilot/hardening`, 2026-11-23)
 
-Код лежит в ветке `pilot/hardening` от `master` (`3dffb2c9d`), отправлена в форк; ревизия на 2026-11-23: `79f1ee623`. Проверка выполняется сценарием [stage1-verification](stage1-verification/SCENARIO.md), который агент может запустить самостоятельно.
+Код лежит в ветке `pilot/hardening` от `master` (`3dffb2c9d`), отправлена в форк; ревизия на 2026-11-23: `79f1ee623`, после второй проверки ИБ (2026-11-28): `e51e77b63`. Проверка выполняется сценарием [stage1-verification](stage1-verification/SCENARIO.md), который агент может запустить самостоятельно.
 
 | Поток | Состояние | Что сделано и что осталось |
 |---|---|---|
@@ -204,6 +204,31 @@
 - роли и TLS PostgreSQL из БПО-6;
 - места `Math.random` и MD5/SHA1 из перечней БР-2 и БР-3, которые сканеры не показывают;
 - все замечания Opus, кроме Opus-4 и пароля по умолчанию из Opus-3.
+
+#### Повторная проверка ИБ (2026-11-26): 12 активных находок
+
+ИБ проверила `pilot/hardening` и прислала 12 активных находок (DefectDojo: Horusec, Semgrep, Dependency-Track): 1 Critical, 6 High, 5 Medium. Исправления — коммиты `1a80e2963` и `e51e77b63` в `pilot/hardening`.
+
+| № | Находка (инструмент, место) | Уровень | Что сделано | Проверка |
+|---|---|---|---|---|
+| Р2-1 | Dependency-Track: `hyper` 1.11.1, CVE-2024-23741 | Critical | CVE относится к терминалу Hyper от Vercel (NVD CPE `cpe:2.3:a:vercel:hyper:*` ≤ 3.4.1, macOS, Electron RunAsNode). В проекте — Rust-библиотека HTTP `hyper` (hyperium), другой продукт с тем же именем. Совпадение только по имени, поэтому никакая версия крейта его не снимает. Записано в `security/vex.cdx.json` (CycloneDX VEX: `not_affected`, `code_not_present`) | `scripts/check-vex.mjs` и тесты; сценарий `deps.hyper`, `r2.vex` |
+| Р2-2…4 | Dependency-Track: `@grpc/grpc-js` 1.14.4, 1.14.5, 1.14.7, CVE-2023-32732 | Medium ×3 | CVE относится к gRPC C-core (NVD CPE `cpe:2.3:a:grpc:grpc:*` < 1.53.0; исправление grpc/grpc PR 32309, `lang/core`). `@grpc/grpc-js` — отдельная реализация на JavaScript без C-core, NVD её не указывает; версии 1.14.x попадают в диапазон только по номеру. Записано в VEX для всех трёх версий (1.14.4 — lock-файл плагина Daytona, 1.14.7 — `scripts/typecheck-sandbox-providers`) | то же; проверка падает, если в lock-файле появится версия, не указанная в VEX |
+| Р2-5 | Horusec: `McpAppFrame.tsx:113` `postMessage(message, "*")` | High | Хост больше не пишет во фрейм через `postMessage`. Скрипт-охранник внутри фрейма создаёт `MessageChannel` и передаёт порт родителю, адресуя сообщение точному origin Paperclip; хост пишет только в этот порт и принимает только первый порт от своего фрейма | тесты `McpAppFrame` и `mcp-app-host`; проверка в браузере: порт приходит из изолированного фрейма, представление получает ответ с origin хоста |
+| Р2-6 | Horusec: `mcp-app-host.ts:353` `parent.postMessage(…, "*")` | High | Все сообщения охранника родителю адресованы origin хоста. Обработчики событий охранника — именованные функции | те же; Horusec по каталогу — 0 находок |
+| Р2-7 | Horusec: `app.ts:1317` `render(req.originalUrl)` | High | Перед рендером путь проходит `sameOriginRequestPath`: только путь того же origin, без `//host`, обратной косой черты, управляющих символов и абсолютных URL; иначе запрос не обрабатывается этим обработчиком | `request-path.test.ts`; Horusec — 0 |
+| Р2-8 | Horusec: `tool-access.ts:1611` `oauthCallbackInterstitialHtml(req.originalUrl)` | High | То же: в страницу попадает только проверенный путь (дополнительно к экранированию внутри функции) | `request-path.test.ts`, `oauth-browser-return.test.ts`; Horusec — 0 |
+| Р2-9 | Semgrep: `email.ts:321` `remote-property-injection` | High | Три заголовка подписи читаются по литеральным именам в объект без прототипа; ключи из запроса не используются | `email-webhook-headers.test.ts` (в том числе `__proto__` в запросе) |
+| Р2-10 | Semgrep: `summary-slots.ts:111` `express-wkhtmltoimage-injection` (SSRF) | High | Тип области и ключ слота из URL разбираются по фиксированным перечислениям до вызова сервиса; неизвестный слот получает 422, сервис не вызывается | `summary-slot-routes.test.ts` (в том числе адрес `169.254.169.254` в ключе слота) |
+| Р2-11 | Horusec: `agents.ts:5361` `readFile(…, req.body.renameTo)` | Medium | `path` и `renameTo` проверяются `instructionPath` в маршруте, до любого файлового сервиса: относительный путь, без `..`, `\`, NUL и букв дисков | `agent-instructions-routes.test.ts`: 5 путей обхода × чтение, запись, переименование → 422, сервис не вызывается |
+| Р2-12 | Horusec: `agents.ts:5398` `readFile(…, req.body.path)` | Medium | То же; запросы `GET`/`DELETE` с `?path=` тоже проверяются в маршруте | то же; Horusec — 0 |
+
+Замечания к таблице:
+- Для Р2-1…4 код не менялся: удалить сами компоненты нельзя без потери функций (AWS SDK и `reqwest` в Rust-раннере, коннектор iMessage). VEX нужно импортировать в Dependency-Track вместе с SBOM (проект → Audit Vulnerabilities → Apply VEX или `POST /api/v1/vex`), тогда находки получат статус `NOT_AFFECTED` с обоснованием.
+- В Р2-11, Р2-12 и Р2-8 проверка была и раньше, внутри сервиса; теперь она стоит в маршруте, в месте, на которое указывает сканер.
+- Повторный Horusec 2.8.0 по затронутым каталогам (`ui/src/components/mcp-app`, `server/src/routes`, `server/src/app.ts`): находок из списка ИБ нет. В `agents.ts` остаются 7 «Potential Hard-coded credential», которых нет в списке ИБ.
+- Semgrep повторно не запускался: наборов правил БР на машине нет. Находки Semgrep проверены тестами.
+- Сценарий `stage1-verification` (`--with-docker --with-app`), 2026-11-28: на `1a80e2963` — **41 пройдено, 0 провалено, 0 открытых, 1 пропущена** (`scanners.horusec`, нужен `--with-scanners`), 2 информационные; отчёт `stage1-verification/results/2026-11-28T06-08-34-074Z/report.md`. После переименования обработчиков (`e51e77b63`) поток E1-12 повторён: 5 из 5; отчёт `results/2026-11-28T06-14-50-638Z/report.md`. Новые проверки: `r2.postmessage`, `r2.render-path`, `r2.traversal`, `r2.selectors`, `r2.vex`. Проверка `deps.hyper` теперь сверяет VEX вместо статуса «открыто».
+- Не проверено: полный набор серверных тестов, CI, 14 тестов драйверов раннера без Rust-бинарника (как и раньше).
 
 ### Этап 2. Остальные замечания и допуск к пилоту
 
