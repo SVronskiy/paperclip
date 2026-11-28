@@ -72,15 +72,25 @@ If stdout stays open or the buffer lacks room for one maximum-size frame,
 runnerd reports uncertainty and keeps the events already committed to disk.
 
 Executors retain polled events until runnerd acknowledges each event after its
-outbox commit. Batches commit one event at a time, so a later oversized event or
-capacity failure cannot roll back the accepted prefix or discard the
-unacknowledged suffix. Each retained executor event has a stable identity that
-runnerd derives into its PRP `sourceEventId`. If the process stops after the
+outbox commit. Runnerd commits each polled batch of up to 128 events with one
+save, and only then acknowledges the batch to the executor. If an event is
+oversized or exceeds capacity, runnerd still saves and acknowledges the events
+before it, and the executor keeps the rejected event and everything after it.
+If the save fails, the executor keeps the whole batch. Each retained executor
+event has a stable identity that runnerd derives into its PRP `sourceEventId`. If the process stops after the
 outbox commit but before the executor acknowledgement, a bounded durable
 receipt journal recognizes and byte-validates the retained copy without
 appending a second event. Receipts outlive transport ACK removal; because the
 provider queue is ordered and bounded, a possibly retained front event cannot
 be evicted while later events advance the journal.
+
+The ACPX executor saves its provider state once for all the sidecar outputs
+that one poll reads, not once for each output. The save comes before an event,
+a command result, or a reply to the sidecar that depends on those outputs
+leaves the executor. An output that ends a turn, calls a tool, or reports a
+lost provider turn is saved at once, as is a provider failure. If the process
+stops before the save, nothing derived from the unsaved outputs has left the
+executor, so recovery is the same as a stop before runnerd read them.
 
 Commands require a contiguous controller sequence. The runner journals a
 pending command before invoking its executor and persists its result afterward.
@@ -175,6 +185,16 @@ keep their usual precedence and compatibility checks.
 fresh snapshot and checkpoint and runs any recovery callback. B can then
 start work. If a write or callback fails, Core can retry the handoff.
 Cancellation cleanup only settles retained work.
+
+**What if the Runner starts as B?** Core can rotate the session to B before
+launch: it archives A's Runner state and starts a Runner under B's identity.
+That Runner starts with fresh durable state over A's saved Codex session. It
+does not restore Codex under A's settings. Until `run.attach`, it refuses
+commands that start work; snapshots and shutdown commands still work. The
+Runner saves the wait in the Codex state before it creates its durable state,
+so a restart before attachment keeps it.
+`run.attach` then starts Codex once with B's settings. ACPX follows the same
+rule.
 
 Live qualification still needs to verify that restoring a provider starts no
 work, deployed storage honors fsync, and the old process has exited.

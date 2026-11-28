@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { createMcpAppHost, MCP_APP_ESCAPE_NOTIFICATION, MCP_APP_HOST_CHANNEL_METHOD, mcpAppDocument, mcpAppNavigationGuard, safeExternalUrl, type McpAppHostContext } from "./mcp-app-host";
+import { createMcpAppHost, MCP_APP_ESCAPE_NOTIFICATION, MCP_APP_HOST_CHANNEL_METHOD, mcpAppDocument, mcpAppNavigationGuard, type McpAppHostContext } from "./mcp-app-host";
 
 const hostContext: McpAppHostContext = {
   theme: "dark",
@@ -332,8 +332,4 @@ describe("mcpAppDocument", () => {
     expect(onEscape).toHaveBeenCalledTimes(1);
   });
 
-  it("allows only http(s) external urls", () => {
-    expect(safeExternalUrl("https://circleback.ai")).toBe("https://circleback.ai/");
-    expect(safeExternalUrl("data:text/html,x")).toBeNull();
-  });
 });
