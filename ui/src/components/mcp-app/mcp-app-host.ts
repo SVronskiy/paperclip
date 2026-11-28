@@ -322,10 +322,10 @@ export function createMcpAppHost(options: McpAppHostOptions) {
  * implicit head, so the view's own `<html>`/`<head>` merge after it and the
  * document keeps standards mode.
  */
-export function mcpAppDocument(html: string, csp: McpAppResourceCsp): string {
+export function mcpAppDocument(html: string, csp: McpAppResourceCsp, hostOrigin: string = globalThis.location?.origin ?? ""): string {
   const policy = buildMcpAppCsp(csp).replace(/"/g, "&quot;");
   const body = html.replace(/^﻿?\s*<!doctype[^>]*>/i, "");
-  return `<!doctype html><meta http-equiv="Content-Security-Policy" content="${policy}"><meta name="referrer" content="no-referrer"><script>${MCP_APP_NAVIGATION_GUARD}</script>${body}`;
+  return `<!doctype html><meta http-equiv="Content-Security-Policy" content="${policy}"><meta name="referrer" content="no-referrer"><script>${mcpAppNavigationGuard(hostOrigin)}</script>${body}`;
 }
 
 /**
@@ -349,11 +349,29 @@ export function mcpAppNavigationGuardSupported(target: unknown = typeof window =
  * - an Escape the view did not handle is reported, so a full-screen dialog closes.
  * Same-document navigations (pushState, hashes) still work.
  */
-export const MCP_APP_NAVIGATION_GUARD = `(function(){
-var n=0;function open(u){try{u=String(new URL(String(u),document.baseURI))}catch(_){return;}if(/^https?:/i.test(u))parent.postMessage({jsonrpc:"2.0",id:"paperclip-link-"+(++n),method:"ui/open-link",params:{url:u}},"*");}
+/** The view's first message: it carries the port the host writes to. */
+export const MCP_APP_HOST_CHANNEL_METHOD = "paperclip/host-channel";
+
+/**
+ * Host-to-view messages never use a wildcard target. The sandboxed frame has an
+ * opaque origin that no target origin can name, so the guard opens a
+ * MessageChannel and hands one port to the parent, addressed to Paperclip's own
+ * origin. The host writes only to that port; the guard replays each message as
+ * a window "message" event (origin = host, source = parent), so views built on
+ * the standard MCP Apps SDK keep working unchanged. The guard's own messages to
+ * the parent are also addressed to the host origin.
+ */
+export function mcpAppNavigationGuard(hostOrigin: string): string {
+  return MCP_APP_NAVIGATION_GUARD_TEMPLATE.replace("__PAPERCLIP_HOST_ORIGIN__", JSON.stringify(hostOrigin).replace(/</g, "\\u003c"));
+}
+
+const MCP_APP_NAVIGATION_GUARD_TEMPLATE = `(function(){
+var H=__PAPERCLIP_HOST_ORIGIN__;
+var n=0;
+try{var ch=new MessageChannel();ch.port1.onmessage=function(e){var m;try{m=new MessageEvent("message",{data:e.data,origin:H,source:parent});}catch(_){m=new MessageEvent("message",{data:e.data,origin:H});}window.dispatchEvent(m);};parent.postMessage({jsonrpc:"2.0",method:"paperclip/host-channel"},H,[ch.port2]);}catch(_){}function open(u){try{u=String(new URL(String(u),document.baseURI))}catch(_){return;}if(/^https?:/i.test(u))parent.postMessage({jsonrpc:"2.0",id:"paperclip-link-"+(++n),method:"ui/open-link",params:{url:u}},H);}
 window.open=function(u){if(u!=null&&u!=="")open(u);return null;};
 var nav=window.navigation;
 if(nav&&nav.addEventListener)nav.addEventListener("navigate",function(e){var d=e.destination;if(!d||d.sameDocument||e.downloadRequest||!e.cancelable)return;e.preventDefault();open(d.url);});
-window.addEventListener("keydown",function(e){if(e.key==="Escape"&&!e.defaultPrevented)parent.postMessage({jsonrpc:"2.0",method:"paperclip/escape-pressed"},"*");});
+window.addEventListener("keydown",function(e){if(e.key==="Escape"&&!e.defaultPrevented)parent.postMessage({jsonrpc:"2.0",method:"paperclip/escape-pressed"},H);});
 document.addEventListener("click",function(e){var t=e.target,a=t&&t.closest?t.closest("a[href]"):null;if(!a||e.defaultPrevented)return;if((a.getAttribute("href")||"").charAt(0)==="#")return;e.preventDefault();open(a.href);},true);
 })();`;

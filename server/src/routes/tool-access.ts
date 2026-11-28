@@ -1,3 +1,4 @@
+import { sameOriginRequestPath } from "../lib/request-path.js";
 import { safeRedirect } from "./safe-redirect.js";
 import { isCrossSiteOAuthCallbackNavigation, oauthCallbackInterstitialHtml } from "../lib/oauth-browser-return.js";
 import { aiConnectionRouterPluginKey, isSamePaperclipInstance, paperclipPeerFromMcpUrl } from "@paperclipai/shared";
@@ -1608,7 +1609,7 @@ function connectorEnrollmentPrincipal(req: Request): string {
       // State is only peeked above, so the same-origin repeat still owns it.
       res.set("Cache-Control", "no-store");
       res.set("Referrer-Policy", "no-referrer");
-      res.type("html").send(oauthCallbackInterstitialHtml(req.originalUrl));
+      res.type("html").send(oauthCallbackInterstitialHtml(sameOriginRequestPath(req) ?? undefined));
       return;
     }
     let result: Awaited<ReturnType<typeof svc.completeOAuthCallback>>;

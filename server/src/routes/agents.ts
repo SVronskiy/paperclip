@@ -5321,11 +5321,12 @@ export function agentRoutes(
       await authorizeInstructionRead(db, req.actor, { companyId: existing.companyId, id: existing.id });
     }
 
-    const relativePath = typeof req.query.path === "string" ? req.query.path : "";
-    if (!relativePath.trim()) {
+    const rawPath = typeof req.query.path === "string" ? req.query.path : "";
+    if (!rawPath.trim()) {
       res.status(422).json({ error: "Query parameter 'path' is required" });
       return;
     }
+    const relativePath = instructionPath(rawPath);
 
     if (req.query.download === "true" && agentInstructionsBundleMode(existing) === "managed") {
       const download = await agentFiles.download(existing.companyId, existing.id, relativePath, req.actor);
@@ -5347,22 +5348,25 @@ export function agentRoutes(
     if (req.actor.source === "mcp_oauth" && req.body.path === "promptTemplate.legacy.md") {
       throw unprocessable("Migrate legacy prompt instructions to a managed instruction file in Paperclip before editing through an assistant", { code: "MCP_LEGACY_INSTRUCTIONS_UNVERSIONED" });
     }
+    // Paths are checked here, before any service sees them: relative, no traversal, no NUL or backslash.
+    const filePath = instructionPath(req.body.path);
+    const renameTo = req.body.renameTo === undefined ? undefined : instructionPath(req.body.renameTo);
     const id = req.params.id as string;
     const existing = await getAccessibleResource(req, res, svc.getById(id), "Agent not found");
     if (!existing) return;
-    if (req.body.renameTo !== undefined) {
+    if (renameTo !== undefined) {
       await assertCanManageInstructionsPath(req, existing);
       assertExternalInstructionsAdmin(req, existing);
       if (req.body.baseHash === undefined) throw unprocessable("Read the file and supply baseHash before renaming it");
       await agentFiles.rename({ companyId: existing.companyId, agentId: existing.id,
-        path: req.body.path, renameTo: req.body.renameTo, bytes: Buffer.from(req.body.content, "utf8"), baseHash: req.body.baseHash }, req.actor);
+        path: filePath, renameTo, bytes: Buffer.from(req.body.content, "utf8"), baseHash: req.body.baseHash }, req.actor);
       const updated = await svc.getById(existing.id);
       if (!updated) throw notFound("Agent not found");
-      res.json(await instructions.readFile(updated, req.body.renameTo));
+      res.json(await instructions.readFile(updated, renameTo));
       return;
     }
     const entryFile = deriveBundleState(existing).entryFile;
-    if (instructionPath(req.body.path) === entryFile) {
+    if (filePath === entryFile) {
       assertExternalInstructionsAdmin(req, existing);
       if (req.body.baseHash !== undefined) req.body.baseRevisionId = req.body.baseHash === null ? null : agentFileTokenFromHash(req.body.baseHash);
       if (req.body.baseRevisionId === undefined) throw unprocessable("Read the entry and supply baseRevisionId (null for a new entry)", { code: "INSTRUCTION_BASE_REQUIRED" });
@@ -5391,14 +5395,14 @@ export function agentRoutes(
     await assertCanManageInstructionsPath(req, existing);
     assertExternalInstructionsAdmin(req, existing);
 
-    if (agentInstructionsBundleMode(existing) === "managed" && req.body.path !== "promptTemplate.legacy.md") {
+    if (agentInstructionsBundleMode(existing) === "managed" && filePath !== "promptTemplate.legacy.md") {
       if (req.body.baseHash === undefined) throw unprocessable("Read the file and supply baseHash (null for a new file)");
-      await agentFiles.write({ companyId: existing.companyId, agentId: existing.id, path: req.body.path,
+      await agentFiles.write({ companyId: existing.companyId, agentId: existing.id, path: filePath,
         bytes: Buffer.from(req.body.content, "utf8"), baseHash: req.body.baseHash }, req.actor);
-      res.json(await instructions.readFile(existing, req.body.path)); return;
+      res.json(await instructions.readFile(existing, filePath)); return;
     }
     const actor = getActorInfo(req);
-    const result = await instructions.writeFile(existing, req.body.path, req.body.content, {
+    const result = await instructions.writeFile(existing, filePath, req.body.content, {
       clearLegacyPromptTemplate: req.body.clearLegacyPromptTemplate,
     });
     const normalizedAdapterConfig = await secretsSvc.normalizeAdapterConfigForPersistence(
@@ -5507,11 +5511,12 @@ export function agentRoutes(
     await assertCanManageInstructionsPath(req, existing);
     assertExternalInstructionsAdmin(req, existing);
 
-    const relativePath = typeof req.query.path === "string" ? req.query.path : "";
-    if (!relativePath.trim()) {
+    const rawPath = typeof req.query.path === "string" ? req.query.path : "";
+    if (!rawPath.trim()) {
       res.status(422).json({ error: "Query parameter 'path' is required" });
       return;
     }
+    const relativePath = instructionPath(rawPath);
 
     if (agentInstructionsBundleMode(existing) === "managed") {
       const baseHash = typeof req.query.baseHash === "string" && /^[a-f0-9]{64}$/.test(req.query.baseHash) ? req.query.baseHash : null;

@@ -106,4 +106,47 @@ describe("McpAppFrame", () => {
     await act(async () => root.unmount());
     container.remove();
   });
+  it("answers the view only through the guard's port, never with a wildcard postMessage", async () => {
+    const callTool = vi.fn(async () => ({ content: [] }));
+    const container = document.createElement("div");
+    document.body.appendChild(container);
+    const root = createRoot(container);
+    await act(async () => root.render(
+      <McpAppFrame
+        title="View"
+        viewId="view-1"
+        toolName="DisplayMeetings"
+        resource={{ uri: "ui://circleback/meetings", html: "<p>cards</p>", csp: {}, permissions: {}, prefersBorder: true }}
+        toolInput={{}}
+        toolResult={{ content: [] }}
+        callTool={callTool}
+      />,
+    ));
+    const iframe = frame(container);
+    expect(iframe.getAttribute("srcdoc")).toContain(JSON.stringify(window.location.origin));
+    const direct = vi.spyOn(iframe.contentWindow!, "postMessage");
+    const received: unknown[] = [];
+    const channel = new MessageChannel();
+    channel.port1.onmessage = (event) => received.push(event.data);
+    await act(async () => {
+      // A request that arrives before the port is answered once the port arrives.
+      fromView(iframe, { jsonrpc: "2.0", id: 1, method: "ui/initialize", params: {} });
+      window.dispatchEvent(new MessageEvent("message", {
+        data: { jsonrpc: "2.0", method: "paperclip/host-channel" }, source: iframe.contentWindow, ports: [channel.port2],
+      }));
+      // A second offer (the view's own code) is ignored.
+      const rogue = new MessageChannel();
+      rogue.port1.onmessage = () => received.push("rogue");
+      window.dispatchEvent(new MessageEvent("message", {
+        data: { jsonrpc: "2.0", method: "paperclip/host-channel" }, source: iframe.contentWindow, ports: [rogue.port2],
+      }));
+      for (let i = 0; i < 50 && received.length === 0; i += 1) await new Promise((resolve) => setTimeout(resolve, 5));
+    });
+    expect(direct).not.toHaveBeenCalled();
+    expect(received).not.toContain("rogue");
+    expect(received[0]).toMatchObject({ jsonrpc: "2.0", id: 1 });
+    channel.port1.close();
+    await act(async () => root.unmount());
+    container.remove();
+  });
 });

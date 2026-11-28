@@ -1,3 +1,4 @@
+import { sameOriginRequestPath } from "./lib/request-path.js";
 import { redirectToValidatedLocation } from "./routes/safe-redirect.js";
 import { authorizationReadScope } from "./services/authorization-read-scope.js";
 import type { IdleDeadlineOwners } from "./services/idle-deadline-types.js";
@@ -1314,7 +1315,12 @@ export async function createApp(
         return;
       }
       try {
-        const html = await renderViteHtml.render(req.originalUrl);
+        const pagePath = sameOriginRequestPath(req);
+        if (pagePath === null) {
+          next();
+          return;
+        }
+        const html = await renderViteHtml.render(pagePath);
         res.status(200).set({ "Content-Type": "text/html" }).end(html);
       } catch (err) {
         next(err);

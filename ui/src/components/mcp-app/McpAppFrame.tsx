@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import {
   createMcpAppHost,
   MCP_APP_HOST_DISPLAY_MODES,
+  MCP_APP_HOST_CHANNEL_METHOD,
   mcpAppDocument,
   type McpAppContainerDimensions,
   type McpAppDisplayMode,
@@ -95,6 +96,8 @@ export function McpAppFrame({
   useLayoutEffect(() => {
     const iframe = iframeRef.current;
     if (!iframe) return;
+    let channel: MessagePort | null = null;
+    const pending: unknown[] = [];
     const hostContext = (): McpAppHostContext => ({
       theme: resolvedTheme(),
       displayMode: latest.current.displayMode,
@@ -108,9 +111,12 @@ export function McpAppFrame({
       styles: { variables: hostStyleVariables() },
     });
     const host = createMcpAppHost({
-      // The view's origin is opaque ("null"), so target "*"; the message only
-      // ever goes to this iframe's own window.
-      post: (message) => iframe.contentWindow?.postMessage(message, "*"),
+      // No wildcard target: messages go only through the port the view's guard
+      // handed over (see mcpAppNavigationGuard). Until it arrives they wait.
+      post: (message) => {
+        if (channel) channel.postMessage(message);
+        else pending.push(message);
+      },
       hostContext,
       get toolInput() { return latest.current.toolInput; },
       get toolResult() { return latest.current.toolResult; },
@@ -143,6 +149,16 @@ export function McpAppFrame({
     iframe.addEventListener("load", onLoad);
     const onMessage = (event: MessageEvent) => {
       if (navigatedAway || event.source !== iframe.contentWindow) return;
+      // The guard runs before any view script, so its port is the first one;
+      // a later offer (the view's own code) is ignored.
+      if ((event.data as { method?: unknown } | null)?.method === MCP_APP_HOST_CHANNEL_METHOD) {
+        const port = event.ports[0];
+        if (!channel && port) {
+          channel = port;
+          for (const message of pending.splice(0)) channel.postMessage(message);
+        }
+        return;
+      }
       host.receive(event.data);
     };
     window.addEventListener("message", onMessage);
@@ -161,6 +177,7 @@ export function McpAppFrame({
       themeObserver.disconnect();
       iframe.removeEventListener("load", onLoad);
       host.teardown();
+      channel?.close();
       window.removeEventListener("message", onMessage);
     };
     // srcDoc is captured by frameKey; tool input and result are read through `latest`.

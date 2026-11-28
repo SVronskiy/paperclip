@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { createMcpAppHost, MCP_APP_ESCAPE_NOTIFICATION, MCP_APP_NAVIGATION_GUARD, mcpAppDocument, safeExternalUrl, type McpAppHostContext } from "./mcp-app-host";
+import { createMcpAppHost, MCP_APP_ESCAPE_NOTIFICATION, MCP_APP_HOST_CHANNEL_METHOD, mcpAppDocument, mcpAppNavigationGuard, safeExternalUrl, type McpAppHostContext } from "./mcp-app-host";
 
 const hostContext: McpAppHostContext = {
   theme: "dark",
@@ -232,6 +232,34 @@ describe("view requests that act for the user", () => {
   });
 });
 
+const HOST = "https://paperclip.test";
+
+describe("mcpAppNavigationGuard host channel", () => {
+  it("hands the parent a port addressed to the host origin and replays port messages as window events", async () => {
+    const calls: Array<{ message: unknown; target: unknown; ports: MessagePort[] }> = [];
+    const parentWindow = { postMessage: (message: unknown, target: unknown, ports?: MessagePort[]) => calls.push({ message, target, ports: ports ?? [] }) };
+    const dispatched: MessageEvent[] = [];
+    const fakeWindow = { open: () => null, addEventListener: () => undefined, dispatchEvent: (event: MessageEvent) => { dispatched.push(event); return true; } };
+    const fakeDocument = { baseURI: "about:srcdoc", addEventListener: () => undefined };
+    new Function("window", "document", "parent", mcpAppNavigationGuard(HOST))(fakeWindow, fakeDocument, parentWindow);
+    expect(calls).toHaveLength(1);
+    expect(calls[0]!.target).toBe(HOST);
+    expect(calls[0]!.message).toEqual({ jsonrpc: "2.0", method: MCP_APP_HOST_CHANNEL_METHOD });
+    const port = calls[0]!.ports[0]!;
+    port.postMessage({ jsonrpc: "2.0", id: 1, result: {} });
+    for (let i = 0; i < 50 && dispatched.length === 0; i += 1) await new Promise((resolve) => setTimeout(resolve, 5));
+    port.close();
+    expect(dispatched).toHaveLength(1);
+    expect(dispatched[0]!.data).toEqual({ jsonrpc: "2.0", id: 1, result: {} });
+    expect(dispatched[0]!.origin).toBe(HOST);
+  });
+
+  it("never addresses a message to every origin", () => {
+    expect(mcpAppNavigationGuard(HOST)).not.toMatch(/postMessage\([^)]*"\*"/);
+    expect(mcpAppNavigationGuard("https://x.test</script>")).not.toContain("</script>");
+  });
+});
+
 describe("mcpAppDocument", () => {
   it("installs the CSP before the view's markup and keeps one doctype", () => {
     const doc = mcpAppDocument("<!DOCTYPE html><html><head><script>1</script></head></html>", { connectDomains: ["https://api.circleback.ai"] });
@@ -242,14 +270,16 @@ describe("mcpAppDocument", () => {
   });
 
   it("runs the navigation guard before any of the view's scripts", () => {
-    const doc = mcpAppDocument("<html><head><script>window.viewStarted = true</script></head></html>", {});
-    expect(doc.indexOf(MCP_APP_NAVIGATION_GUARD)).toBeGreaterThan(doc.indexOf("Content-Security-Policy"));
-    expect(doc.indexOf(MCP_APP_NAVIGATION_GUARD)).toBeLessThan(doc.indexOf("window.viewStarted"));
+    const doc = mcpAppDocument("<html><head><script>window.viewStarted = true</script></head></html>", {}, HOST);
+    const guard = mcpAppNavigationGuard(HOST);
+    expect(doc.indexOf(guard)).toBeGreaterThan(doc.indexOf("Content-Security-Policy"));
+    expect(doc.indexOf(guard)).toBeLessThan(doc.indexOf("window.viewStarted"));
   });
 
   it("routes links of any target and window.open through ui/open-link", () => {
     const posted: unknown[] = [];
-    const parentWindow = { postMessage: (message: unknown) => posted.push(message) };
+    const targets: unknown[] = [];
+    const parentWindow = { postMessage: (message: unknown, target: unknown) => { targets.push(target); if ((message as { method?: string }).method !== MCP_APP_HOST_CHANNEL_METHOD) posted.push(message); } };
     const anchors: Array<{ href: string; attrs: Record<string, string> }> = [
       { href: "https://app.circleback.ai/meetings/m1", attrs: { href: "https://app.circleback.ai/meetings/m1", target: "_blank" } },
       { href: "https://app.circleback.ai/meetings/m2", attrs: { href: "https://app.circleback.ai/meetings/m2" } },
@@ -262,7 +292,7 @@ describe("mcpAppDocument", () => {
       baseURI: "about:srcdoc",
       addEventListener: (type: string, handler: (event: unknown) => void) => { if (type === "click") clickHandler = handler; },
     };
-    new Function("window", "document", "parent", MCP_APP_NAVIGATION_GUARD)(fakeWindow, fakeDocument, parentWindow);
+    new Function("window", "document", "parent", mcpAppNavigationGuard(HOST))(fakeWindow, fakeDocument, parentWindow);
     const prevented: boolean[] = [];
     for (const anchor of anchors) {
       let defaultPrevented = false;
@@ -275,6 +305,8 @@ describe("mcpAppDocument", () => {
     }
     expect((fakeWindow.open as (url: string) => unknown)("https://circleback.ai/meetings/m3")).toBeNull();
     expect(prevented).toEqual([true, true, false, true]);
+    expect(targets.length).toBeGreaterThan(0);
+    expect(targets.every((target) => target === HOST)).toBe(true);
     expect(posted.map((message) => (message as { params: { url: string } }).params.url)).toEqual([
       "https://app.circleback.ai/meetings/m1",
       "https://app.circleback.ai/meetings/m2",
@@ -287,7 +319,7 @@ describe("mcpAppDocument", () => {
     let keydown: ((event: unknown) => void) | null = null;
     const fakeWindow = { open: () => null, addEventListener: (type: string, handler: (event: unknown) => void) => { if (type === "keydown") keydown = handler; } };
     const fakeDocument = { baseURI: "about:srcdoc", addEventListener: () => undefined };
-    new Function("window", "document", "parent", MCP_APP_NAVIGATION_GUARD)(fakeWindow, fakeDocument, { postMessage: (message: unknown) => posted.push(message) });
+    new Function("window", "document", "parent", mcpAppNavigationGuard(HOST))(fakeWindow, fakeDocument, { postMessage: (message: unknown) => { if ((message as { method?: string }).method !== MCP_APP_HOST_CHANNEL_METHOD) posted.push(message); } });
     keydown!({ key: "Escape", defaultPrevented: true });
     keydown!({ key: "Enter", defaultPrevented: false });
     expect(posted).toEqual([]);

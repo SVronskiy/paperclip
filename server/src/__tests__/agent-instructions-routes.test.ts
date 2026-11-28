@@ -265,6 +265,20 @@ describe("agent instructions bundle routes", () => {
     });
   });
 
+  it.each(["../../etc/passwd", "/etc/passwd", "notes/../../secret", "a\\b.md", "C:/x.md"])(
+    "refuses the traversal path %j before any file service runs", async (bad) => {
+      const app = await createApp();
+      const agent = "/api/agents/11111111-1111-4111-8111-111111111111/instructions-bundle/file";
+      const read = await requestApp(app, (baseUrl) => request(baseUrl).get(agent).query({ path: bad }));
+      const write = await requestApp(app, (baseUrl) => request(baseUrl).put(agent).send({ path: bad, content: "x", baseHash: null }));
+      const rename = await requestApp(app, (baseUrl) => request(baseUrl).put(agent).send({ path: "AGENTS.md", renameTo: bad, content: "x", baseHash: "a".repeat(64) }));
+      for (const res of [read, write, rename]) {
+        expect(res.status, JSON.stringify(res.body)).toBe(422);
+      }
+      expect(mockAgentInstructionsService.readFile).not.toHaveBeenCalled();
+      expect(mockAgentInstructionsService.writeFile).not.toHaveBeenCalled();
+    });
+
   it("returns bundle metadata", async () => {
     const res = await requestApp(
       await createApp(),

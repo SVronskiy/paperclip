@@ -316,9 +316,15 @@ export function emailRoutes(db: Db, service: EmailChannelService) {
 export function emailWebhookRoutes(service: EmailChannelService) {
   const router = Router();
   router.post("/api/chat-webhooks/agentmail/:publicId", async (req, res) => {
-    const headers: Record<string, string> = {};
-    for (const key of ["svix-id", "svix-timestamp", "svix-signature"])
-      if (typeof req.headers[key] === "string") headers[key] = req.headers[key];
+    // Only the three signature headers, each read by its literal name; nothing
+    // from the request chooses a property name.
+    const headers: Record<string, string> = Object.create(null);
+    const svixId = req.get("svix-id");
+    const svixTimestamp = req.get("svix-timestamp");
+    const svixSignature = req.get("svix-signature");
+    if (svixId !== undefined) headers["svix-id"] = svixId;
+    if (svixTimestamp !== undefined) headers["svix-timestamp"] = svixTimestamp;
+    if (svixSignature !== undefined) headers["svix-signature"] = svixSignature;
     if (!Buffer.isBuffer(req.body))
       throw forbidden("Raw webhook body required");
     await service.webhook(req.params.publicId, req.body, headers);

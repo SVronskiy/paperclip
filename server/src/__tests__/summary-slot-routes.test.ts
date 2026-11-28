@@ -211,7 +211,7 @@ describe("summary slot routes", () => {
       const app = await createApp(boardActor);
       const res = await request(app).post(
         `/api/companies/${companyId}/summary-slots/project/header/generate`,
-      ).send({});
+      ).send({ scopeId: projectId });
       expect(res.status, JSON.stringify(res.body)).toBe(200);
       expect(res.body.alreadyGenerating).toBe(true);
       expect(mockHeartbeatWakeup).not.toHaveBeenCalled();
@@ -224,6 +224,15 @@ describe("summary slot routes", () => {
         `/api/companies/${companyId}/summary-slots/project/header/generate`,
       ).send({});
       expect(res.status, JSON.stringify(res.body)).toBe(403);
+      expect(mockSummarySlotService.generate).not.toHaveBeenCalled();
+    });
+
+    it("rejects an unknown slot before the service runs", async () => {
+      const app = await createApp(boardActor);
+      const res = await request(app).post(
+        `/api/companies/${companyId}/summary-slots/project/http%3A%2F%2F169.254.169.254/generate`,
+      ).send({ scopeId: projectId });
+      expect(res.status, JSON.stringify(res.body)).toBe(422);
       expect(mockSummarySlotService.generate).not.toHaveBeenCalled();
     });
 

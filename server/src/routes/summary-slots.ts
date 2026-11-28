@@ -1,8 +1,8 @@
 import { Router, type Request } from "express";
 import type { Db } from "@paperclipai/db";
-import { generateSummarySlotSchema, writeSummarySlotSchema } from "@paperclipai/shared";
+import { generateSummarySlotSchema, summarySlotScopeSelectorSchema, writeSummarySlotSchema } from "@paperclipai/shared";
 import { validate } from "../middleware/validate.js";
-import { forbidden, notFound } from "../errors.js";
+import { forbidden, notFound, unprocessable } from "../errors.js";
 import { accessService, heartbeatService, instanceSettingsService, logActivity } from "../services/index.js";
 import { queueIssueAssignmentWakeup } from "../services/issue-assignment-wakeup.js";
 import { summarySlotService } from "../services/summary-slots.js";
@@ -12,6 +12,20 @@ function readScopeId(req: Request): string | null {
   const raw = req.query.scopeId;
   if (typeof raw === "string" && raw.trim().length > 0) return raw;
   return null;
+}
+
+/**
+ * The slot a request names, parsed against the fixed scope kinds and slot keys
+ * before it reaches the summary service. Nothing from the URL is passed on raw.
+ */
+function readSelector(req: Request, scopeId: string | null | undefined) {
+  const parsed = summarySlotScopeSelectorSchema.safeParse({
+    scopeKind: req.params.scopeKind,
+    slotKey: req.params.slotKey,
+    scopeId: scopeId ?? null,
+  });
+  if (!parsed.success) throw unprocessable("Invalid summary slot selector", parsed.error.issues);
+  return { scopeKind: parsed.data.scopeKind, slotKey: parsed.data.slotKey, scopeId: parsed.data.scopeId ?? null };
 }
 
 export function summarySlotSessionTaskKey(input: {
@@ -79,9 +93,7 @@ export function summarySlotRoutes(db: Db) {
     await assertSummariesEnabled();
     const result = await svc.getSlot({
       companyId,
-      scopeKind: req.params.scopeKind as string,
-      slotKey: req.params.slotKey as string,
-      scopeId: readScopeId(req),
+      ...readSelector(req, readScopeId(req)),
     });
     res.json(result);
   });
@@ -92,9 +104,7 @@ export function summarySlotRoutes(db: Db) {
     await assertSummariesEnabled();
     const result = await svc.listRevisions({
       companyId,
-      scopeKind: req.params.scopeKind as string,
-      slotKey: req.params.slotKey as string,
-      scopeId: readScopeId(req),
+      ...readSelector(req, readScopeId(req)),
     });
     res.json(result);
   });
@@ -110,9 +120,7 @@ export function summarySlotRoutes(db: Db) {
       const result = await svc.generate(
         {
           companyId,
-          scopeKind: req.params.scopeKind as string,
-          slotKey: req.params.slotKey as string,
-          scopeId: (req.body?.scopeId as string | null | undefined) ?? readScopeId(req),
+          ...readSelector(req, (req.body?.scopeId as string | null | undefined) ?? readScopeId(req)),
         },
         {
           agentId: actor.actorType === "agent" ? actor.actorId : null,
@@ -172,9 +180,7 @@ export function summarySlotRoutes(db: Db) {
       const result = await svc.write(
         {
           companyId,
-          scopeKind: req.params.scopeKind as string,
-          slotKey: req.params.slotKey as string,
-          scopeId: (req.body?.scopeId as string | null | undefined) ?? readScopeId(req),
+          ...readSelector(req, (req.body?.scopeId as string | null | undefined) ?? readScopeId(req)),
           markdown: req.body.markdown,
           title: req.body.title ?? null,
           changeSummary: req.body.changeSummary ?? null,
