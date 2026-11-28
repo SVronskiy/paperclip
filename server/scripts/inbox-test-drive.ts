@@ -1,3 +1,4 @@
+import { embeddedPostgresUrl } from "@paperclipai/db/embedded-password";
 // Simulate provider outcomes inside the isolated local inbox dev database.
 import { readFileSync, realpathSync } from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -12,7 +13,7 @@ if (!["reset", "one-left", "all-recovered", "repeat", ...chainPhases].includes(p
 const dir = realpathSync(fileURLToPath(new URL("../../tmp/inbox-drive/instances/default/db", import.meta.url)));
 const port = Number(readFileSync(dir + "/postmaster.pid", "utf8").split("\n")[3]);
 if (!Number.isInteger(port) || port < 1 || port > 65535) throw new Error("Start the isolated dev server first");
-const url = `postgres://paperclip:paperclip@127.0.0.1:${port}/paperclip`;
+const url = embeddedPostgresUrl(dir, port, "paperclip");
 if (realpathSync((await getPostgresDataDirectory(url))!) !== dir) throw new Error("Unexpected database directory");
 const db = createDb(url);
 const id = (n: number) => `1b0a0000-0000-4000-8000-${String(n).padStart(12, "0")}`;

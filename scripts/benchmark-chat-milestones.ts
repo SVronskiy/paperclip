@@ -1,11 +1,14 @@
 import assert from "node:assert/strict";
-import { createHash, randomUUID } from "node:crypto";
+import { createHash, randomBytes, randomUUID } from "node:crypto";
 import { execFileSync } from "node:child_process";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { companies, agents, issues, applyPendingMigrations, createDb, startEmbeddedPostgresTestDatabase, type Db } from "../packages/db/src/index.js";
 import * as treatment from "../server/src/services/chat-run-publications.js";
+
+// The disposable Docker PostgreSQL gets a fresh password per run; no fixed credential.
+const DISPOSABLE_DB_PASSWORD = randomBytes(18).toString("hex");
 
 type Query = { sql: string; params: unknown[] };
 const dockerPostgres = process.argv.includes("--docker-postgres=17");
@@ -352,7 +355,7 @@ async function startDatabase() {
   const container = `paperclip-chat-milestones-${randomUUID()}`;
   const docker = (...args: string[]) => execFileSync("docker", args, { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }).trim();
   docker("run", "--detach", "--rm", "--name", container, "--label", "paperclip.benchmark=chat-milestones", "--publish", "127.0.0.1::5432",
-    "--env", "POSTGRES_USER=paperclip", "--env", "POSTGRES_PASSWORD=paperclip", "--env", "POSTGRES_DB=paperclip", "postgres:17");
+    "--env", "POSTGRES_USER=paperclip", "--env", `POSTGRES_PASSWORD=${DISPOSABLE_DB_PASSWORD}`, "--env", "POSTGRES_DB=paperclip", "postgres:17");
   const cleanup = async () => { docker("rm", "--force", container); };
   try {
     let ready = false;
@@ -362,7 +365,7 @@ async function startDatabase() {
     }
     assert.ok(ready, "Disposable Docker PostgreSQL did not become ready");
     const port = docker("port", container, "5432/tcp").split(":").at(-1);
-    const connectionString = `postgres://paperclip:paperclip@127.0.0.1:${port}/paperclip`;
+    const connectionString = `postgres://paperclip:${DISPOSABLE_DB_PASSWORD}@127.0.0.1:${port}/paperclip`;
     await applyPendingMigrations(connectionString);
     return { connectionString, cleanup };
   } catch (error) { await cleanup(); throw error; }

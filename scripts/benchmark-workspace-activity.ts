@@ -9,6 +9,9 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { agents, applyPendingMigrations, companies, createDb, executionWorkspaces, issues, startEmbeddedPostgresTestDatabase, type Db } from "../packages/db/src/index.js";
 import * as expiration from "../server/src/services/git-workspace-expiration.js";
 
+// The disposable Docker PostgreSQL gets a fresh password per run; no fixed credential.
+const DISPOSABLE_DB_PASSWORD = randomBytes(18).toString("hex");
+
 type Query = { sql: string; params: unknown[] };
 type Workspace = typeof executionWorkspaces.$inferSelect;
 type Plan = { "Node Type": string; "Relation Name"?: string; "Index Name"?: string; "Actual Rows"?: number; "Actual Loops"?: number; "Shared Hit Blocks"?: number; "Shared Read Blocks"?: number; "Temp Read Blocks"?: number; "Temp Written Blocks"?: number; Plans?: Plan[] };
@@ -51,7 +54,7 @@ async function startDatabase() {
   if (!dockerPostgres) return startEmbeddedPostgresTestDatabase("workspace-activity-benchmark-");
   const container = `paperclip-workspace-activity-${randomUUID()}`;
   const docker = (...args: string[]) => execFileSync("docker", args, { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }).trim();
-  docker("run", "--detach", "--rm", "--name", container, "--publish", "127.0.0.1::5432", "--env", "POSTGRES_USER=paperclip", "--env", "POSTGRES_PASSWORD=paperclip", "--env", "POSTGRES_DB=paperclip", "postgres:17");
+  docker("run", "--detach", "--rm", "--name", container, "--publish", "127.0.0.1::5432", "--env", "POSTGRES_USER=paperclip", "--env", `POSTGRES_PASSWORD=${DISPOSABLE_DB_PASSWORD}`, "--env", "POSTGRES_DB=paperclip", "postgres:17");
   const cleanup = async () => { docker("rm", "--force", container); };
   try {
     let ready = false;
@@ -60,7 +63,7 @@ async function startDatabase() {
     }
     assert.ok(ready, "Disposable Docker PostgreSQL did not become ready");
     const port = docker("port", container, "5432/tcp").split(":").at(-1);
-    const connectionString = `postgres://paperclip:paperclip@127.0.0.1:${port}/paperclip`;
+    const connectionString = `postgres://paperclip:${DISPOSABLE_DB_PASSWORD}@127.0.0.1:${port}/paperclip`;
     await applyPendingMigrations(connectionString);
     return { connectionString, cleanup };
   } catch (error) { await cleanup(); throw error; }
