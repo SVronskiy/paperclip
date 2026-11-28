@@ -1,9 +1,9 @@
 #!/usr/bin/env node
-import { spawn } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { discoverWorkspacePackagePaths } from "./ensure-workspace-package-links.mjs";
+import { spawn } from "node:child_process";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -42,6 +42,46 @@ export function findWorkspacePostinstallScripts(rootDir = repoRoot) {
   };
 }
 
+/**
+ * Splits a lifecycle script into an argument array without a shell. Single and
+ * double quotes group words (inside double quotes a backslash escapes only
+ * $ ` " \\ and newline, as in POSIX sh). Any shell syntax outside quotes (pipes, `&&`, `;`, redirects,
+ * `$` expansion, backticks, globs, subshells) is refused, so a hook can only be
+ * one plain command.
+ */
+export function parseLifecycleCommand(script) {
+  const argv = [];
+  let current = "";
+  let quote = null;
+  let started = false;
+  for (let i = 0; i < script.length; i += 1) {
+    const ch = script[i];
+    if (quote === "'") {
+      if (ch === "'") quote = null; else current += ch;
+      continue;
+    }
+    if (quote === '"') {
+      if (ch === '"') quote = null;
+      // POSIX: inside double quotes a backslash escapes only $ ` " \\ and newline.
+      else if (ch === "\\" && i + 1 < script.length && "$`\"\\\n".includes(script[i + 1])) current += script[++i];
+      else current += ch;
+      continue;
+    }
+    if (ch === "'" || ch === '"') { quote = ch; started = true; continue; }
+    if (/\s/.test(ch)) {
+      if (started) { argv.push(current); current = ""; started = false; }
+      continue;
+    }
+    if (/[|&;<>$`()*?\\{}\[\]!~#]/.test(ch)) throw new Error(`unsupported shell syntax ${JSON.stringify(ch)} in ${JSON.stringify(script)}`);
+    current += ch;
+    started = true;
+  }
+  if (quote) throw new Error(`unterminated quote in ${JSON.stringify(script)}`);
+  if (started) argv.push(current);
+  if (argv.length === 0) throw new Error("empty postinstall script");
+  return argv;
+}
+
 function runHook(hook, rootDir, env = process.env) {
   const binDirs = [
     path.join(hook.dir, "node_modules", ".bin"),
@@ -49,10 +89,19 @@ function runHook(hook, rootDir, env = process.env) {
   ];
   const mergedPath = [...binDirs, env.PATH ?? ""].filter(Boolean).join(path.delimiter);
   return new Promise((resolve, reject) => {
-    const child = spawn(hook.script, {
+    let argv;
+    try {
+      argv = parseLifecycleCommand(hook.script);
+    } catch (error) {
+      reject(new Error(`postinstall in ${hook.relDir}: ${error.message}`));
+      return;
+    }
+    const [command, ...args] = argv;
+    // No shell: the hook is split into an argument array and `node` is this Node.
+    const child = spawn(command === "node" ? process.execPath : command, args, {
       cwd: hook.dir,
       env: { ...env, PATH: mergedPath },
-      shell: true,
+      shell: false,
       stdio: "inherit",
     });
     child.once("error", (error) => {

@@ -21,6 +21,7 @@ export const DEPENDENCY_SCRIPT_INPUTS = new Set([
   "scripts/link-plugin-dev-sdk.mjs",
   "scripts/ensure-workspace-package-links.mjs",
   "scripts/replay-workspace-postinstall.mjs",
+  "scripts/lib/pnpm-invocation.mjs",
   "server/scripts/install-copilot-assets.mjs",
   "packages/paperclip-runner/scripts/install-copilot-assets.mjs",
   "packages/paperclip-runner/scripts/materialize-copilot-binary.mjs",

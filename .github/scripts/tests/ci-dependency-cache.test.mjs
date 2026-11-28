@@ -4,7 +4,7 @@ import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "nod
 import os from "node:os";
 import path from "node:path";
 import { DEPENDENCY_SCRIPT_INPUTS, cachePlan } from "../../../scripts/ci-dependency-cache.mjs";
-import { findWorkspacePostinstallScripts, replayWorkspacePostinstalls } from "../../../scripts/replay-workspace-postinstall.mjs";
+import { findWorkspacePostinstallScripts, parseLifecycleCommand, replayWorkspacePostinstalls } from "../../../scripts/replay-workspace-postinstall.mjs";
 
 const entries = {
   "package.json": '{"scripts":{"postinstall":"node scripts/link-plugin-dev-sdk.mjs"}}',
@@ -217,4 +217,12 @@ test('paired test timings remain available when lifecycle hooks disable material
     'server/src/services/workspace-git-snapshot-streaming.test.ts']) assert.ok(scope.includes(file));
   assert.doesNotMatch(scope, /scripts\/ci-dependency-cache|\.github\/actions\/setup-ci-dependencies/);
   assert.match(step('Exercise restored dependencies for cache-only changes'), /pnpm exec vitest run --project @paperclipai\/shared/);
+});
+
+test('replay-workspace-postinstall splits hooks without a shell and refuses shell syntax', () => {
+  assert.deepEqual(parseLifecycleCommand('node scripts/link-plugin-dev-sdk.mjs'), ['node', 'scripts/link-plugin-dev-sdk.mjs']);
+  assert.deepEqual(parseLifecycleCommand(`node -e "console.log('a b')"`), ['node', '-e', "console.log('a b')"]);
+  for (const script of ['node a.mjs && rm -rf /', 'node a.mjs; id', 'node a.mjs | sh', 'node $HOME/a.mjs', 'node `id`', 'node a > out', 'node $(id)', 'node "unterminated']) {
+    assert.throws(() => parseLifecycleCommand(script), /unsupported shell syntax|unterminated quote/, script);
+  }
 });
